@@ -64,8 +64,9 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
       <OfflineBanner />
       <div className="flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar  transition-[width] duration-200 lg:block ${collapsed ? "w-20" : "w-72"
-            }`}
+          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-200 lg:block ${
+            collapsed ? "w-20" : "w-72"
+          }`}
         >
           <SidebarContent
             collapsed={collapsed}
@@ -100,29 +101,27 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
         ) : null}
 
         <div
-          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-20" : "lg:pl-72"
-            }`}
+          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${
+            collapsed ? "lg:pl-20" : "lg:pl-72"
+          }`}
         >
-          <header className="sticky top-0 z-30 border-b border-border bg-card/95 px-4 py-3 shadow-sm backdrop-blur md:px-6 lg:px-8">
+          <header className="sticky top-0 z-30 border-b border-border bg-white px-4 py-3 md:px-6 lg:px-8">
             <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
                   title="Open navigation"
                   onClick={() => setMobileOpen(true)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground lg:hidden"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-background text-muted-foreground lg:hidden"
                 >
                   <Bars3Icon className="h-5 w-5" />
                 </button>
-                <div className="hidden h-11 w-11 items-center justify-center rounded-xl bg-primary-light lg:flex">
+                <div className="hidden h-10 w-10 items-center justify-center rounded bg-primary-light lg:flex">
                   <DocumentChartBarIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground">
+                  <p className="truncate text-base font-medium text-foreground">
                     Employee Workspace
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    Productivity reporting and approval operations
                   </p>
                 </div>
               </div>
@@ -130,7 +129,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
                 <InstallPrompt />
                 <Link
                   href="/reports/create"
-                  className="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  className="inline-flex min-h-10 items-center rounded bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
                   Create Report
                 </Link>
@@ -164,26 +163,23 @@ function SidebarContent({
   mobileClose?: boolean;
 }) {
   return (
-    <div className="flex h-full flex-col px-3 py-4">
-      <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
+    <div className="flex h-full flex-col py-4">
+      <div className={`flex items-center px-4 ${collapsed ? "justify-center" : "justify-between"}`}>
         <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center">
             <Image
               src="/brand-logo.svg"
               alt="Report Manager"
-              width={30}
-              height={18}
+              width={24}
+              height={16}
               priority
               className="h-auto w-auto"
             />
           </span>
           {!collapsed ? (
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-sidebar-foreground">
+              <span className="block truncate text-lg font-medium text-sidebar-foreground">
                 Report Manager
-              </span>
-              <span className="block truncate text-xs text-sidebar-muted">
-                Employee OS
               </span>
             </span>
           ) : null}
@@ -192,7 +188,7 @@ function SidebarContent({
           type="button"
           title={mobileClose ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={onToggle}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-sidebar-muted hover:bg-white/10 hover:text-white"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-sidebar-muted hover:bg-muted hover:text-foreground"
         >
           {mobileClose ? (
             <XMarkIcon className="h-5 w-5" />
@@ -203,12 +199,8 @@ function SidebarContent({
           )}
         </button>
       </div>
-      {!collapsed ? (
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-          <span className="text-sm font-semibold  text-foreground">Hey {name} 👋</span>
-        </div>
-      ) : null}
-      <nav aria-label="Primary navigation" className="mt-3 grid gap-1">
+
+      <nav aria-label="Primary navigation" className="mt-6 grid gap-1 pr-4">
         {navigation.map((item) => {
           const Icon = item.icon;
           const active = item.segment === segment;
@@ -220,8 +212,8 @@ function SidebarContent({
               aria-current={active ? "page" : undefined}
               className={
                 active
-                  ? "flex min-h-11 items-center gap-3 rounded-xl bg-primary px-3 text-sm font-semibold text-white shadow-sm"
-                  : "flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-sidebar-muted transition-colors hover:bg-gray-200 hover:text-foreground"
+                  ? "flex min-h-10 items-center gap-4 rounded-e-full bg-primary-light pl-6 pr-4 text-sm font-medium text-primary"
+                  : "flex min-h-10 items-center gap-4 rounded-e-full pl-6 pr-4 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-muted"
               }
             >
               <Icon className="h-5 w-5 shrink-0" />
@@ -231,13 +223,13 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="mt-auto space-y-3">
-
+      <div className="mt-auto pr-4">
         <button
           type="button"
           onClick={onLogout}
-          className={`flex w-full min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-sm font-medium text-danger transition-colors hover:bg-danger/10  ${collapsed ? "justify-center" : ""
-            }`}
+          className={`flex w-full min-h-10 cursor-pointer items-center gap-4 rounded-e-full pl-6 pr-4 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-muted ${
+            collapsed ? "justify-center pl-0" : ""
+          }`}
           title={collapsed ? "Logout" : undefined}
         >
           <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />

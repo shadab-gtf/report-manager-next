@@ -24,7 +24,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
   return (
     <main className="min-h-screen bg-background px-4 py-6 text-foreground md:px-6">
       <div className="mx-auto grid min-h-[calc(100vh-48px)] w-full max-w-7xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-slate-200/70 lg:grid-cols-[0.95fr_1.05fr]">
-        <section className="relative flex min-h-[560px] flex-col justify-between overflow-hidden bg-sidebar p-6 text-white md:p-8">
+        <section className="relative hidden lg:flex min-h-[560px] flex-col justify-between overflow-hidden bg-sidebar p-6 text-white md:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,0.34),transparent_26rem)]" />
           <div className="relative">
             <Link href="/login" className="inline-flex items-center gap-3">
@@ -82,8 +82,25 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
             </p>
           </div>
         </section>
-        <section className="flex items-center justify-center bg-white p-5 md:p-8">
-          <div className="w-full max-w-xl">{children}</div>
+        <section className="flex flex-col items-center justify-center bg-white p-5 md:p-8">
+          <div className="w-full max-w-xl">
+            <Link href="/login" className="mb-8 inline-flex items-center gap-3 lg:hidden">
+              <span className="flex h-8 w-8 items-center justify-center">
+                <Image
+                  src="/brand-logo.svg"
+                  alt="Report Manager"
+                  width={24}
+                  height={16}
+                  priority
+                  className="h-auto w-auto"
+                />
+              </span>
+              <span className="text-lg font-medium text-foreground">
+                Report Manager
+              </span>
+            </Link>
+            {children}
+          </div>
         </section>
       </div>
 

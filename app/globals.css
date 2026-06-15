@@ -1,37 +1,37 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #dbeafe;
-  --secondary: #475569;
-  --secondary-light: #e2e8f0;
-  --success: #15803d;
-  --success-light: #dcfce7;
-  --warning: #b45309;
-  --warning-light: #fef3c7;
-  --danger: #dc2626;
-  --danger-light: #fee2e2;
-  --info: #0369a1;
-  --info-light: #e0f2fe;
-  --background: #f5f7fb;
-  --foreground: #0f172a;
+  --primary: #1a73e8;
+  --primary-hover: #174ea6;
+  --primary-light: #e8f0fe;
+  --secondary: #5f6368;
+  --secondary-light: #f1f3f4;
+  --success: #188038;
+  --success-light: #ceead6;
+  --warning: #f29900;
+  --warning-light: #fef7e0;
+  --danger: #d93025;
+  --danger-light: #fce8e6;
+  --info: #1a73e8;
+  --info-light: #e8f0fe;
+  --background: #f8f9fa;
+  --foreground: #202124;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --border: #dbe3ef;
-  --input: #cbd5e1;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --sidebar: #0f172a;
-  --sidebar-border: #1e293b;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-muted: #94a3b8;
-  --ring: #2563eb;
-  --skeleton: #e2e8f0;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
+  --card-foreground: #202124;
+  --border: #dadce0;
+  --input: #dadce0;
+  --muted: #f8f9fa;
+  --muted-foreground: #5f6368;
+  --sidebar: #ffffff;
+  --sidebar-border: #dadce0;
+  --sidebar-foreground: #3c4043;
+  --sidebar-muted: #5f6368;
+  --ring: #1a73e8;
+  --skeleton: #f1f3f4;
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
 }
 
 @theme inline {
@@ -62,7 +62,7 @@
   --color-sidebar-muted: var(--sidebar-muted);
   --color-ring: var(--ring);
   --color-skeleton: var(--skeleton);
-  --font-sans: "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+  --font-sans: "Inter", "Roboto", "Segoe UI", sans-serif;
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
@@ -80,11 +80,9 @@ html {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgb(37 99 235 / 0.08), transparent 28rem),
-    linear-gradient(180deg, #f8fafc 0%, var(--background) 42%);
+  background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+  font-family: "Inter", "Roboto", "Segoe UI", sans-serif;
 }
 
 a {

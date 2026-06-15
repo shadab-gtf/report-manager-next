@@ -13,17 +13,17 @@ interface MetricCardProps {
 
 export function MetricCard({ metric }: MetricCardProps) {
   return (
-    <article className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="rounded border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-4">
-        <p className="text-sm font-medium text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {metric.label}
         </p>
-        <span className={`h-2.5 w-2.5 rounded-full ${toneClassName[metric.tone]}`} />
+        <span className={`h-2 w-2 rounded-full ${toneClassName[metric.tone]}`} />
       </div>
-      <p className="mt-4 text-3xl font-semibold tracking-normal text-card-foreground">
+      <p className="mt-3 text-2xl font-normal text-card-foreground">
         {metric.value}
       </p>
-      <p className="mt-2 text-sm text-muted-foreground">{metric.change}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{metric.change}</p>
     </article>
   );
 }
