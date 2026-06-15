@@ -414,7 +414,7 @@ function ReportPreview({
     <div className="overflow-x-auto rounded-lg sm:rounded-none">
       <iframe
         srcDoc={htmlContent}
-        className="w-[600px] min-w-[600px] h-[800px] border border-border mx-auto rounded-lg shadow-sm"
+        className="w-[700px] min-w-[700px] h-[800px] border border-border mx-auto rounded-lg shadow-sm"
         title="Email Preview"
       />
     </div>

@@ -1,41 +1,80 @@
 interface EmailTemplateData {
   managerEmail?: string;
   employeeName: string;
+  reportDate: string;
+  day?: string;
   department: string;
   designation: string;
-  managerName: string;
-  reportDate: string;
+  managerName: string; // Used for "Reporting To" and Signature
   totalHours: number;
-  tasks: any[];
-  meetings: any[];
+  tasks: {
+    description?: string;
+    category?: string;
+    priority?: string;
+    status?: string;
+    timeSpent?: number | string;
+    completion?: number | string;
+    plannedBy?: string;
+    notes?: string;
+  }[];
+  meetings: {
+    subject?: string;
+    withWhom?: string;
+    time?: string;
+    duration?: number | string;
+    type?: string;
+    outcome?: string;
+  }[];
   pending: string;
   blockers: string;
   tomorrowPlan: string;
+  keyAccomplishments?: string;
+  overallScore?: string | number;
 }
 
 export function generateHtmlEmail(data: EmailTemplateData): string {
-  const tasksHtml = data.tasks.map((task, i) => `
-    <tr style="background-color: ${i % 2 === 0 ? '#e4eff6' : '#ffffff'};">
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600; color: #1e293b;">${i + 1}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: left; color: #0056b3;">${task.description || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${task.category || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #1e293b;">${task.priority || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #1e293b;">${task.status || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${task.timeSpent !== undefined ? Number(task.timeSpent).toFixed(1) : "0.0"}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${task.completion !== undefined ? task.completion + "%" : "0%"}</td>
+  // Pad tasks array to at least 12 rows to match the visual height of the image, or render what's passed
+  const paddedTasks = [...data.tasks];
+  while (paddedTasks.length < Math.max(12, data.tasks.length)) {
+    paddedTasks.push({});
+  }
+
+  const tasksHtml = paddedTasks.map((task, i) => `
+    <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.description || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.category || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.priority || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.status || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.timeSpent !== undefined && task.timeSpent !== "" ? Number(task.timeSpent).toFixed(1) : "0.0"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.completion !== undefined && task.completion !== "" ? task.completion + "%" : "0%"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.plannedBy || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.notes || "&nbsp;"}</td>
     </tr>
   `).join("");
 
-  const meetingsHtml = data.meetings.map((meeting, i) => `
-    <tr style="background-color: ${i % 2 === 0 ? '#e4eff6' : '#ffffff'};">
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600; color: #1e293b;">${i + 1}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: left; color: #0056b3;">${meeting.subject || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${meeting.withWhom || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${meeting.time || ""}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${meeting.duration || "0"}</td>
-      <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; color: #0056b3;">${meeting.type || ""}</td>
+  const paddedMeetings = [...data.meetings];
+  while (paddedMeetings.length < Math.max(6, data.meetings.length)) {
+    paddedMeetings.push({});
+  }
+
+  const meetingsHtml = paddedMeetings.map((meeting, i) => `
+    <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.subject || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8;">${meeting.withWhom || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.time || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 50px;">${meeting.duration !== undefined && meeting.duration !== "" ? meeting.duration : "0"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.type || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.outcome || "&nbsp;"}</td>
     </tr>
   `).join("");
+
+  const tasksCompleted = data.tasks.filter(t => t.status === "Done" || t.completion === 100 || t.completion === "100").length;
+  const tasksTotal = Math.max(data.tasks.length, 1);
+  const avgCompletion = Math.round(
+    data.tasks.reduce((acc, t) => acc + (Number(t.completion) || 0), 0) / tasksTotal
+  );
 
   return `
 <!DOCTYPE html>
@@ -44,152 +83,186 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
   <meta charset="utf-8">
   <title>Daily Report</title>
 </head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f1f5f9; color: #0f172a;">
-  <div style="background-color: #ffffff; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; font-size: 12px; line-height: 1.5;">
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333333;">
+  <div style="background-color: #ffffff; max-width: 700px; margin: 0 auto; font-size: 11px; line-height: 1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
     
     <!-- Top Header -->
-    <div style="background-color: #212E4A; color: #ffffff; padding: 16px; padding-bottom: 8px; border-bottom: 4px solid #D8A036; text-align: center;">
-      <h1 style="font-size: 20px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin: 0;">Employee Daily Work Report</h1>
-      <div style="margin-top: 12px; font-size: 11px; color: #D8A036; font-weight: 500; font-style: italic;">
+    <div style="background-color: #23304c; color: #ffffff; padding: 16px; text-align: center; border-bottom: 4px solid #d8a036;">
+      <h1 style="font-size: 18px; font-weight: bold; margin: 0; letter-spacing: 0.5px;">📋 EMPLOYEE DAILY WORK REPORT</h1>
+      <div style="margin-top: 8px; font-size: 10px; color: #d8a036; font-style: italic;">
         Office: 9:30 AM – 7:00 PM &nbsp;|&nbsp; Lunch: 2:00 PM – 2:30 PM &nbsp;|&nbsp; Net Working Hours: 9 Hrs / Day
       </div>
     </div>
 
-    <div style="padding: 24px;">
-      
-      <!-- Info Block -->
-      <table width="100%" align="center" style="border-collapse: collapse; font-size: 12px; margin-bottom: 24px;">
-        <tr>
-          <td style="border: 1px solid #cbd5e1; background-color: #f8f9fa; padding: 8px 16px; font-weight: 600; width: 25%; text-align: center;">Employee Name</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #e4eff6; padding: 8px 16px; width: 25%; text-align: center; color: #0056b3;">${data.employeeName}</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #f8f9fa; padding: 8px 16px; font-weight: 600; width: 25%; text-align: center;">Date</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #e4eff6; padding: 8px 16px; width: 25%; text-align: center; color: #0056b3;">${data.reportDate}</td>
-        </tr>
-        <tr>
-          <td style="border: 1px solid #cbd5e1; background-color: #f8f9fa; padding: 8px 16px; font-weight: 600; text-align: center;">Department</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #e4eff6; padding: 8px 16px; text-align: center; color: #0056b3;">${data.department}</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #f8f9fa; padding: 8px 16px; font-weight: 600; text-align: center;">Designation</td>
-          <td style="border: 1px solid #cbd5e1; background-color: #e4eff6; padding: 8px 16px; text-align: center; color: #0056b3;">${data.designation}</td>
-        </tr>
-      </table>
+    <!-- Employee Info -->
+    <table width="100%" style="border-collapse: collapse; font-size: 11px; margin: 12px 0;">
+      <tr>
+        <td style="padding: 6px 8px; font-weight: bold; width: 14%; color: #333;">Employee Name</td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.employeeName}</div></td>
+        <td style="padding: 6px 8px; font-weight: bold; width: 8%; color: #333;">Date</td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.reportDate}</div></td>
+        <td style="padding: 6px 8px; font-weight: bold; width: 8%; color: #333;">Day</td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.day || new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date())}</div></td>
+      </tr>
+      <tr>
+        <td style="padding: 6px 8px; font-weight: bold; color: #333;">Department</td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.department}</div></td>
+        <td style="padding: 6px 8px; font-weight: bold; color: #333;">Designation</td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.designation}</div></td>
+        <td style="padding: 6px 8px; font-weight: bold; color: #333;">Reporting To</td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.managerName}</div></td>
+      </tr>
+    </table>
 
+    <div style="padding: 0;">
       <!-- Task Log -->
-      <div style="margin-bottom: 24px;">
-        <div style="background-color: #212E4A; color: #ffffff; padding: 8px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
-          Task Log
-        </div>
-        <table width="100%" style="border-collapse: collapse; border: 1px solid #212E4A; font-size: 11px; text-align: center;">
-          <thead style="background-color: #1A8377; color: #ffffff; font-weight: 600;">
-            <tr>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px; width: 30px;">#</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Task / Activity<br/>Description</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Category</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Priority</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Status</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Time<br/>Spent (hrs)</th>
-              <th style="border: 1px solid #1A8377; padding: 6px;">% Done</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tasksHtml}
-          </tbody>
-          <tfoot>
-            <tr style="background-color: #212E4A; color: #ffffff; font-weight: bold; font-size: 13px;">
-              <td colspan="5" style="border: 1px solid #212E4A; padding: 10px 16px; text-align: center; letter-spacing: 1px;">TOTALS</td>
-              <td style="border: 1px solid #212E4A; padding: 10px 8px;">${data.totalHours.toFixed(1)}</td>
-              <td style="border: 1px solid #212E4A; padding: 10px 8px;">—</td>
-            </tr>
-          </tfoot>
-        </table>
+      <div style="background-color: #23304c; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold;">
+        📋 TASK LOG
       </div>
+      <table width="100%" style="border-collapse: collapse; border: 1px solid #23304c; font-size: 10px; text-align: center;">
+        <thead style="background-color: #157262; color: #ffffff; font-weight: bold;">
+          <tr>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">#</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Task / Activity Description</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Category</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Priority</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Status</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Time<br/>Spent</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">%<br/>Done</th>
+            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Planned<br/>by</th>
+            <th style="border: 1px solid #157262; padding: 6px 4px;">Notes / Blockers</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasksHtml}
+        </tbody>
+        <tfoot>
+          <tr style="background-color: #23304c; color: #ffffff; font-weight: bold; font-size: 11px;">
+            <td colspan="5" style="border: 1px solid #23304c; padding: 6px; text-align: center; letter-spacing: 0.5px;">TOTALS</td>
+            <td style="border: 1px solid #23304c; padding: 6px;">${data.totalHours.toFixed(1)}</td>
+            <td style="border: 1px solid #23304c; padding: 6px;">—</td>
+            <td colspan="2" style="border: 1px solid #23304c; padding: 6px; text-align: center;">${tasksCompleted} tasks done today</td>
+          </tr>
+        </tfoot>
+      </table>
 
       <!-- Meetings & Calls Log -->
-      <div style="margin-bottom: 24px;">
-        <div style="background-color: #7A298F; color: #ffffff; padding: 8px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
-          Meetings & Calls Log
-        </div>
-        <table width="100%" style="border-collapse: collapse; border: 1px solid #7A298F; font-size: 11px; text-align: center;">
-          <thead style="background-color: #7A298F; color: #ffffff; font-weight: 600;">
-            <tr>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px; width: 30px;">#</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Subject / Meeting<br/>Name</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">With Whom</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Time</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Duration<br/>(min)</th>
-              <th style="border: 1px solid #7A298F; padding: 6px;">Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${meetingsHtml}
-          </tbody>
-        </table>
+      <div style="background-color: #6b2288; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
+        📞 MEETINGS & CALLS LOG
       </div>
+      <table width="100%" style="border-collapse: collapse; border: 1px solid #23304c; font-size: 10px; text-align: center;">
+        <thead style="background-color: #6b2288; color: #ffffff; font-weight: bold;">
+          <tr>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">#</th>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">Subject / Meeting Name</th>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">With Whom</th>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">Time</th>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">Duration<br/>(min)</th>
+            <th style="border: 1px solid #6b2288; border-right: 1px solid #23304c; padding: 6px 4px;">Type</th>
+            <th style="border: 1px solid #6b2288; padding: 6px 4px;">Outcome / Next Steps</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${meetingsHtml}
+        </tbody>
+      </table>
 
       <!-- End of Day Notes -->
-      <div style="margin-bottom: 40px;">
-        <div style="background-color: #E27A23; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px;">
-          End of Day Notes
-        </div>
-        
-        <div style="margin-bottom: 16px;">
-          <div style="background-color: #E27A23; color: #ffffff; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 1px solid #E27A23;">
-            Pending / Carry Forward:
-          </div>
-          <div style="border: 1px solid #212E4A; border-top: 0; background-color: #e4eff6; padding: 12px; min-height: 60px; color: #0056b3;">
-            ${data.pending || "N/A"}
-          </div>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <div style="background-color: #E27A23; color: #ffffff; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 1px solid #E27A23;">
-            Blockers / Challenges Faced:
-          </div>
-          <div style="border: 1px solid #212E4A; border-top: 0; background-color: #e4eff6; padding: 12px; min-height: 60px; color: #0056b3;">
-            ${data.blockers || "N/A"}
-          </div>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <div style="background-color: #E27A23; color: #ffffff; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 1px solid #E27A23;">
-            Plan for Tomorrow:
-          </div>
-          <div style="border: 1px solid #212E4A; border-top: 0; background-color: #e4eff6; padding: 12px; min-height: 60px; color: #0056b3;">
-            ${data.tomorrowPlan || "N/A"}
-          </div>
-        </div>
+      <div style="background-color: #df7622; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
+        📝 END OF DAY NOTES
       </div>
-
-    </div>
-    
-    <!-- Footer Signatures -->
-    <div style="margin-top: 32px; background-color: #e4eff6; padding: 16px; font-size: 13px; color: #334155; border-top: 1px solid #212E4A; border-bottom: 1px solid #212E4A;">
-      <table width="100%" style="text-align: center;">
+      
+      <table width="100%" style="border-collapse: collapse; font-size: 11px;">
         <tr>
-          <td width="33%">
-            <div style="font-weight: 600; color: #1e293b; margin-bottom: 8px;">Employee Signature:</div>
-            <div style="border-bottom: 1px solid #ef4444; width: 150px; margin: 0 auto; padding-bottom: 4px;">
-              <span style="font-size: 24px; color: #212E4A; font-family: 'Give You Glory', cursive;">${data.employeeName}</span>
-            </div>
+          <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
+            Key Accomplishments Today:
           </td>
-          <td width="33%">
-            <div style="font-weight: 600; color: #1e293b; margin-bottom: 8px;">Date:</div>
-            <div style="border-bottom: 1px solid #ef4444; width: 120px; margin: 0 auto; padding-bottom: 4px;">
-              <span style="font-size: 14px; font-weight: bold; color: #212E4A;">${data.reportDate}</span>
-            </div>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
+            ${data.keyAccomplishments || "&nbsp;"}
           </td>
-          <td width="33%">
-            <div style="font-weight: 600; color: #1e293b; margin-bottom: 8px;">Manager Sign:</div>
-            <div style="border-bottom: 1px solid #ef4444; width: 150px; margin: 0 auto; padding-bottom: 4px;">
-              <span style="font-size: 24px; color: #212E4A; font-family: 'Give You Glory', cursive;">${data.managerName}</span>
-            </div>
+        </tr>
+        <tr><td style="height: 4px;"></td></tr>
+        
+        <tr>
+          <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
+            Pending / Carry Forward:
+          </td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
+            ${data.pending || "&nbsp;"}
+          </td>
+        </tr>
+        <tr><td style="height: 4px;"></td></tr>
+        
+        <tr>
+          <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
+            Blockers / Challenges Faced:
+          </td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
+            ${data.blockers || "&nbsp;"}
+          </td>
+        </tr>
+        <tr><td style="height: 4px;"></td></tr>
+        
+        <tr>
+          <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
+            Plan for Tomorrow:
+          </td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
+            ${data.tomorrowPlan || "&nbsp;"}
           </td>
         </tr>
       </table>
-    </div>
 
+      <!-- Productivity Scores -->
+      <div style="background-color: #157262; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
+        📊 TODAY'S PRODUCTIVITY SCORE
+      </div>
+      <table width="100%" style="border-collapse: collapse; border: 1px solid #23304c; font-size: 11px;">
+        <tr>
+          <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; width: 40%; color: #333;">Tasks Completed</td>
+          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${tasksCompleted} / ${data.tasks.length || 0}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Total Hrs Logged</td>
+          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${data.totalHours.toFixed(1)} hrs</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Avg Task Completion</td>
+          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${avgCompletion}%</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Meetings Today</td>
+          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${data.meetings.length} meetings</td>
+        </tr>
+        <tr>
+          <td style="background-color: #23304c; color: #ffffff; padding: 10px 12px; font-size: 10px; font-weight: bold; border: 1px solid #23304c;">⭐ OVERALL PRODUCTIVITY SCORE</td>
+          <td style="padding: 10px 12px; border: 1px solid #23304c; background-color: #fff9c4; color: #333; font-weight: bold; text-align: center; font-size: 13px;">${data.overallScore || '—'}</td>
+        </tr>
+      </table>
+
+      <!-- Footer Signatures -->
+     <table width="100%" style="text-align: center; font-style: italic; font-size: 10px; color: #333; margin-top: 16px; padding: 16px 0;">
+        <tr>
+          <td width="13%" style="text-align: right; padding-right: 8px;">Employee Signature:</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.employeeName}</td>
+          <td width="13%" style="text-align: right; padding-right: 8px;">Date:</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.reportDate}</td>
+          <td width="13%" style="text-align: right; padding-right: 8px;">Manager Sign:</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.managerName}</td>
+        </tr>
+      </table>
+      <div style="height: 12px;"></div>
+
+    </div>
   </div>
-  <!-- Google Font import for Give You Glory -->
-  <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&display=swap" rel="stylesheet">
 </body>
 </html>
   `;

@@ -45,10 +45,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
                 </span>
               </span>
             </Link>
-            <div className="mt-16 max-w-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-800">
-                Workforce reporting platform
-              </p>
+            <div className="mt-52 max-w-xl">
               <h1 className="mt-4 text-4xl font-semibold text-foreground tracking-normal md:text-5xl">
                 {title}
               </h1>
@@ -56,7 +53,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
                 {description}
               </p>
             </div>
-            <div className="mt-10 grid gap-3 sm:grid-cols-2">
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 hidden">
               {proofPoints.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -73,7 +70,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
               })}
             </div>
           </div>
-          <div className="relative rounded-2xl border border-white/10 bg-white/[0.06] p-4">
+          <div className="relative hidden rounded-2xl border border-white/10 bg-white/[0.06] p-4">
             <p className="text-sm font-semibold text-foreground">Demo access</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               Use any employee ID or email, choose Employee or Manager, and use

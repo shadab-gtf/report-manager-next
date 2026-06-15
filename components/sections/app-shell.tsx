@@ -18,7 +18,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { InstallPrompt } from "@/components/ui/install-prompt";
-import { NotificationCenter } from "@/components/ui/notification-center";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, clearSession } from "@/store/store";
@@ -64,9 +63,8 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
       <OfflineBanner />
       <div className="flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-200 lg:block ${
-            collapsed ? "w-20" : "w-72"
-          }`}
+          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-200 lg:block ${collapsed ? "w-20" : "w-72"
+            }`}
         >
           <SidebarContent
             collapsed={collapsed}
@@ -101,9 +99,8 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
         ) : null}
 
         <div
-          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${
-            collapsed ? "lg:pl-20" : "lg:pl-72"
-          }`}
+          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-20" : "lg:pl-72"
+            }`}
         >
           <header className="sticky top-0 z-30 border-b border-border bg-white px-4 py-3 md:px-6 lg:px-8">
             <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4">
@@ -227,9 +224,8 @@ function SidebarContent({
         <button
           type="button"
           onClick={onLogout}
-          className={`flex w-full min-h-10 cursor-pointer items-center gap-4 rounded-e-full pl-6 pr-4 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-muted ${
-            collapsed ? "justify-center pl-0" : ""
-          }`}
+          className={`flex w-full min-h-10 cursor-pointer items-center gap-4 rounded-e-full pl-6 pr-4 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-muted ${collapsed ? "justify-center pl-0" : ""
+            }`}
           title={collapsed ? "Logout" : undefined}
         >
           <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
