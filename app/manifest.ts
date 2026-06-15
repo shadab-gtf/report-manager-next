@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Report Manager",
     short_name: "Reports",
     description:
-      "Enterprise employee productivity and daily reporting platform.",
+      "Employee productivity and daily reporting platform.",
     start_url: "/",
     scope: "/",
     display: "standalone",

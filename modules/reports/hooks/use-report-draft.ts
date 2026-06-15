@@ -25,7 +25,7 @@ function createEmptyDraft(): DailyReportDraft {
       {
         id: createId("task"),
         description: "",
-        category: "Operations",
+        category: "Other",
         priority: "Medium",
         timeSpent: 0,
         completion: 0,
@@ -144,7 +144,7 @@ export function useReportDraft() {
         {
           id: createId("task"),
           description: "",
-          category: "Operations",
+          category: "Other",
           priority: "Medium",
           timeSpent: 0,
           completion: 0,

@@ -25,7 +25,6 @@ export interface WebAuthnCapability {
 
 interface StoredUserInfo {
   identifier: string;
-  role: "Employee" | "Manager";
 }
 
 /* ─── Capability Detection ───────────────────────────────────── */
@@ -104,7 +103,7 @@ function generateMockAuthenticationOptions(
   };
 }
 
-/* ─── Public API ─────────────────────────────────────────────── */
+/* ─── Public API ── */
 
 /**
  * Registers a new platform authenticator (Face ID / fingerprint / PIN)
@@ -116,7 +115,6 @@ function generateMockAuthenticationOptions(
  */
 export async function registerPasskey(
   identifier: string,
-  role: "Employee" | "Manager",
 ): Promise<void> {
   const options = generateMockRegistrationOptions(identifier);
 
@@ -126,7 +124,7 @@ export async function registerPasskey(
   window.localStorage.setItem(CREDENTIAL_STORE_KEY, registration.id);
   window.localStorage.setItem(
     REGISTERED_USER_KEY,
-    JSON.stringify({ identifier, role } satisfies StoredUserInfo),
+    JSON.stringify({ identifier } satisfies StoredUserInfo),
   );
 }
 
@@ -151,22 +149,18 @@ export async function authenticateWithPasskey(): Promise<{
     throw new Error("No registered user data found on this device.");
   }
 
-  const { identifier, role } = JSON.parse(storedUser) as StoredUserInfo;
+  const { identifier } = JSON.parse(storedUser) as StoredUserInfo;
 
   const options = generateMockAuthenticationOptions(credentialId);
 
-  // This triggers Face ID / Touch ID / Windows Hello / device PIN
   await startAuthentication({ optionsJSON: options });
 
-  // In production: send assertion to backend for cryptographic verification.
-  // Here we build the session from stored user data (same as loginWithMockApi).
   const session: AuthSession = {
     employeeId: identifier.includes("@") ? "GTF-1042" : identifier,
-    name: role === "Manager" ? "Priya Menon" : "Aarav Sharma",
-    role,
-    email: identifier.includes("@") ? identifier : "aarav.sharma@gtf.example",
-    reportingManager: "Priya Menon",
-    reportingManagerEmail: "priya.menon@gtf.example",
+    name: "Kuldeep",
+    email: identifier.includes("@") ? identifier : "kuldeep.choudhary@gtftechnologies.com",
+    reportingManager: "Saurabh Yadav",
+    reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
   };
 
   return { session };

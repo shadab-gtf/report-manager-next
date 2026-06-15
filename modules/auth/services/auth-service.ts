@@ -2,7 +2,6 @@ import type { AuthSession, SignupEmployeeInfo } from "@/types/auth";
 
 export async function loginWithMockApi(
   identifier: string,
-  role: "Employee" | "Manager",
 ): Promise<AuthSession> {
   await new Promise((resolve) => {
     setTimeout(resolve, 500);
@@ -10,11 +9,10 @@ export async function loginWithMockApi(
 
   return {
     employeeId: identifier.includes("@") ? "GTF-1042" : identifier,
-    name: role === "Manager" ? "Priya Menon" : "Aarav Sharma",
-    role,
-    email: identifier.includes("@") ? identifier : "aarav.sharma@gtf.example",
-    reportingManager: "Priya Menon",
-    reportingManagerEmail: "priya.menon@gtf.example",
+    name: "Kuldeep",
+    email: identifier.includes("@") ? identifier : "kuldeep.choudhary@gtftechnologies.com",
+    reportingManager: "Saurabh Yadav",
+    reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
   };
 }
 

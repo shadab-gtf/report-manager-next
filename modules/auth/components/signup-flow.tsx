@@ -82,6 +82,12 @@ export function SignupFlow() {
         ) : null}
         {step === 4 && employee ? <SuccessStep employee={employee} /> : null}
       </div>
+      <div className="mt-8 text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-primary hover:underline">
+          Login
+        </Link>
+      </div>
     </div>
   );
 }
@@ -99,11 +105,11 @@ function EmployeeInfoStep({
     resolver: zodResolver(employeeInfoSchema),
     defaultValues: {
       employeeId: "GTF-1042",
-      fullName: "Aarav Sharma",
+      fullName: "Kuldeep",
       designation: "Operations Associate",
       department: "Operations",
-      reportingManager: "Priya Menon",
-      officialEmail: "aarav.sharma@gtf.example",
+      reportingManager: "Saurabh Yadav",
+      officialEmail: "kuldeep.choudhary@gtftechnologies.com",
       mobileNumber: "9876543210",
     },
   });
@@ -112,22 +118,13 @@ function EmployeeInfoStep({
     <form className="grid gap-4" onSubmit={handleSubmit(onComplete)}>
       <StepHeading title="Employee information" />
       <div className="grid gap-4 md:grid-cols-2">
-        {[
-          ["employeeId", "Employee ID"],
-          ["fullName", "Full name"],
-          ["designation", "Designation"],
-          ["department", "Department"],
-          ["reportingManager", "Reporting manager"],
-          ["officialEmail", "Official GTF email"],
-          ["mobileNumber", "Mobile number"],
-        ].map(([name, label]) => (
-          <Field
-            key={name}
-            label={label}
-            registration={register(name as keyof EmployeeInfoValues)}
-            error={errors[name as keyof EmployeeInfoValues]?.message}
-          />
-        ))}
+        <Field label="Employee ID" registration={register("employeeId")} error={errors.employeeId?.message} />
+        <Field label="Full name" registration={register("fullName")} error={errors.fullName?.message} />
+        <SelectField label="Designation" registration={register("designation")} error={errors.designation?.message} options={["Operations Associate", "Software Engineer", "Manager", "Analyst", "Intern", "Other"]} />
+        <SelectField label="Department" registration={register("department")} error={errors.department?.message} options={["Operations", "Technology", "Marketing", "Sales", "HR", "Finance", "Other"]} />
+        <SelectField label="Reporting manager" registration={register("reportingManager")} error={errors.reportingManager?.message} options={["Saurabh Yadav", "Priya Menon", "Vikram Singh", "Other"]} />
+        <Field label="Official GTF email" registration={register("officialEmail")} error={errors.officialEmail?.message} />
+        <Field label="Mobile number" registration={register("mobileNumber")} error={errors.mobileNumber?.message} />
       </div>
       <PrimaryButton>Continue</PrimaryButton>
     </form>
@@ -287,7 +284,7 @@ function Field({
   type = "text",
 }: {
   label: string;
-  registration: UseFormRegisterReturn;
+  registration: UseFormRegisterReturn<any>;
   error?: string;
   type?: string;
 }) {
@@ -299,6 +296,36 @@ function Field({
         className="h-11 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
         {...registration}
       />
+      {error ? <span className="font-normal text-danger">{error}</span> : null}
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  registration,
+  error,
+  options,
+}: {
+  label: string;
+  registration: UseFormRegisterReturn<any>;
+  error?: string;
+  options: string[];
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-semibold text-foreground">
+      {label}
+      <select
+        className="h-11 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+        {...registration}
+      >
+        <option value="">Select {label}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
       {error ? <span className="font-normal text-danger">{error}</span> : null}
     </label>
   );

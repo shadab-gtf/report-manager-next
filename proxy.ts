@@ -10,24 +10,24 @@ const publicRoutes = new Set([
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = request.cookies.get("rm_session")?.value;
-  const role = request.cookies.get("rm_role")?.value;
 
-  if (pathname === "/") {
-    return NextResponse.redirect(
-      new URL(session ? "/dashboard" : "/login", request.url),
-    );
+  if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
+    if (session) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.next();
   }
 
-  if (publicRoutes.has(pathname) && session) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (!publicRoutes.has(pathname) && !session) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (pathname.startsWith("/team") && role !== "Manager") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/reports") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/settings")
+  ) {
+    if (!session) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();
@@ -38,7 +38,6 @@ export const config = {
     "/",
     "/dashboard/:path*",
     "/reports/:path*",
-    "/team/:path*",
     "/profile/:path*",
     "/settings/:path*",
     "/login",

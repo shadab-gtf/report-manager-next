@@ -40,16 +40,16 @@ export function InstallPrompt() {
   return (
     <button
       type="button"
-      title="Install app"
+      title="Install the app"
       onClick={async () => {
         await installEvent.prompt();
         await installEvent.userChoice;
         setInstallEvent(null);
       }}
-      className="hidden min-h-11 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-muted sm:inline-flex"
+      className="hidden min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-muted sm:inline-flex"
     >
       <ArrowDownTrayIcon aria-hidden="true" className="h-4 w-4" />
-      Install
+      Install the App
     </button>
   );
 }

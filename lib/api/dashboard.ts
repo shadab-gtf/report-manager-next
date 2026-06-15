@@ -17,10 +17,10 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
 
   return {
     user: {
-      name: "Aarav Sharma",
+      name: "Kuldeep",
       role: "Employee",
       department: "Operations",
-      reportingManager: "Priya Menon",
+      reportingManager: "Saurabh Yadav",
     },
     currentDate: new Intl.DateTimeFormat("en-US", {
       weekday: "long",

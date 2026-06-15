@@ -3,7 +3,6 @@ import { z } from "zod";
 export const loginSchema = z.object({
   identifier: z.string().min(3, "Enter your employee ID or official email."),
   password: z.string().min(8, "Password must be at least 8 characters."),
-  role: z.enum(["Employee", "Manager"]),
   rememberMe: z.boolean(),
 });
 
@@ -14,7 +13,7 @@ export const employeeInfoSchema = z.object({
   department: z.string().min(2, "Department is required."),
   reportingManager: z.string().min(2, "Reporting manager is required."),
   officialEmail: z.string().email("Use a valid official email."),
-  mobileNumber: z.string().min(10, "Mobile number must include 10 digits."),
+  mobileNumber: z.string().optional(),
 });
 
 export const securitySchema = z
@@ -27,6 +26,8 @@ export const securitySchema = z
     path: ["confirmPassword"],
   });
 
+export const signupSchema = z.intersection(employeeInfoSchema, securitySchema);
+
 export const otpSchema = z.object({
   otp: z.string().length(6, "Enter the 6 digit OTP."),
 });
@@ -34,4 +35,5 @@ export const otpSchema = z.object({
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type EmployeeInfoValues = z.infer<typeof employeeInfoSchema>;
 export type SecurityValues = z.infer<typeof securitySchema>;
+export type SignupFormValues = z.infer<typeof signupSchema>;
 export type OtpValues = z.infer<typeof otpSchema>;

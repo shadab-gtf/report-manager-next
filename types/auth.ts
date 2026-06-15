@@ -5,7 +5,7 @@ export interface SignupEmployeeInfo {
   department: string;
   reportingManager: string;
   officialEmail: string;
-  mobileNumber: string;
+  mobileNumber?: string;
 }
 
 export interface SignupSecurityInfo {
@@ -22,7 +22,6 @@ export interface SignupState {
 export interface AuthSession {
   employeeId: string;
   name: string;
-  role: "Employee" | "Manager";
   email: string;
   reportingManager: string;
   reportingManagerEmail: string;

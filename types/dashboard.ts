@@ -2,7 +2,6 @@ export type ReportingStatus = "submitted" | "draft" | "pending-sync";
 
 export interface UserProfile {
   name: string;
-  role: "Employee" | "Manager";
   department: string;
   reportingManager: string;
 }

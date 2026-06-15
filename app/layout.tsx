@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Give_You_Glory } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { PwaRegistry } from "@/components/ui/pwa-registry";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const giveYouGlory = Give_You_Glory({ subsets: ["latin"], weight: "400", variable: "--font-give-you-glory" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://report-manager.local"),
@@ -70,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en" className={`h-full ${inter.className} ${inter.variable} ${giveYouGlory.variable}`} suppressHydrationWarning>
       <body className="min-h-full">
         <AppProviders>
           {children}

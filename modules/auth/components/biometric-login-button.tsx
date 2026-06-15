@@ -11,6 +11,7 @@ import {
 import { persistSession } from "@/modules/auth/services/session-client";
 import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/store";
+import Link from "next/link";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -24,8 +25,6 @@ type BiometricState =
 interface BiometricLoginButtonProps {
   /** Current identifier value from the login form */
   identifier: string;
-  /** Current role value from the login form */
-  role: "Employee" | "Manager";
 }
 
 /* ─── Icons (inline SVG to avoid extra dependencies) ─────────── */
@@ -120,7 +119,6 @@ const BUTTON_VARIANT: Record<BiometricState, string> = {
 
 export function BiometricLoginButton({
   identifier,
-  role,
 }: BiometricLoginButtonProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -147,7 +145,7 @@ export function BiometricLoginButton({
       dispatch(setSession(session));
       persistSession(session, true);
       setState("success");
-      router.push(session.role === "Manager" ? "/team" : "/dashboard");
+      router.push("/dashboard");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Biometric authentication failed.";
@@ -168,7 +166,7 @@ export function BiometricLoginButton({
     setErrorMessage(null);
 
     try {
-      await registerPasskey(identifier, role);
+      await registerPasskey(identifier);
       setCapability(getWebAuthnCapability());
       setState("idle");
     } catch (err) {
@@ -177,7 +175,7 @@ export function BiometricLoginButton({
       setErrorMessage(message);
       setState("error");
     }
-  }, [identifier, role]);
+  }, [identifier]);
 
   /* ─── Don't render when WebAuthn is unsupported ─────────── */
   if (!capability.supported) {
@@ -197,6 +195,7 @@ export function BiometricLoginButton({
 
   return (
     <div className="grid gap-2">
+
       {/* ── Divider ── */}
       <div className="flex items-center gap-3" role="separator">
         <span className="h-px flex-1 bg-border" />

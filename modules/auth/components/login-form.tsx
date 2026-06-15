@@ -29,20 +29,18 @@ export function LoginForm() {
     defaultValues: {
       identifier: "GTF-1042",
       password: "password123",
-      role: "Employee",
       rememberMe: true,
     },
   });
 
   const watchedIdentifier = watch("identifier");
-  const watchedRole = watch("role");
 
   async function onSubmit(values: LoginFormValues) {
-    const session = await loginWithMockApi(values.identifier, values.role);
+    const session = await loginWithMockApi(values.identifier);
     dispatch(setSession(session));
     persistSession(session, values.rememberMe);
     setServerMessage("Session created. Redirecting to dashboard.");
-    router.push(values.role === "Manager" ? "/team" : "/dashboard");
+    router.push("/dashboard");
   }
 
   return (
@@ -55,8 +53,7 @@ export function LoginForm() {
           Sign in to Report Manager
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Role-aware access for employee reports, manager review queues, and
-          offline-ready daily submissions.
+          Secure access for employee reports and offline-ready daily submissions.
         </p>
       </div>
       <div>
@@ -72,19 +69,7 @@ export function LoginForm() {
           <p className="mt-1 text-sm text-danger">{errors.identifier.message}</p>
         ) : null}
       </div>
-      <div>
-        <label className="text-sm font-semibold text-foreground" htmlFor="role">
-          Workspace role
-        </label>
-        <select
-          id="role"
-          className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
-          {...register("role")}
-        >
-          <option value="Employee">Employee</option>
-          <option value="Manager">Manager</option>
-        </select>
-      </div>
+
       <div>
         <label className="text-sm font-semibold text-foreground" htmlFor="password">
           Password
@@ -123,8 +108,14 @@ export function LoginForm() {
 
       <BiometricLoginButton
         identifier={watchedIdentifier}
-        role={watchedRole}
       />
+      
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="font-semibold text-primary hover:underline">
+          Sign up
+        </Link>
+      </div>
     </form>
   );
 }

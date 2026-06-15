@@ -12,7 +12,15 @@ interface DashboardHeroProps {
   overview: DashboardOverview;
 }
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 export function DashboardHero({ overview }: DashboardHeroProps) {
+  const greeting = getGreeting();
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <div className="grid gap-0 xl:grid-cols-[1fr_420px]">
@@ -26,7 +34,7 @@ export function DashboardHero({ overview }: DashboardHeroProps) {
             </span>
           </div>
           <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-normal text-card-foreground md:text-5xl">
-            Good morning, {overview.user.name}
+            {greeting}, {overview.user.name}
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-muted-foreground">
             {overview.user.department} workspace with daily reporting, offline

@@ -28,7 +28,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(37,99,235,0.34),transparent_26rem)]" />
           <div className="relative">
             <Link href="/login" className="inline-flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white">
+              <span className="flex h-11 w-11 items-center justify-center ">
                 <Image
                   src="/brand-logo.svg"
                   alt="Report Manager"
@@ -39,20 +39,20 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
                 />
               </span>
               <span>
-                <span className="block text-sm font-semibold">Report Manager</span>
-                <span className="block text-xs text-slate-400">
+                <span className="block text-sm text-foreground font-semibold">Report Manager</span>
+                <span className="block text-xs text-slate-800">
                   Enterprise Productivity OS
                 </span>
               </span>
             </Link>
             <div className="mt-16 max-w-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-200">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-800">
                 Workforce reporting platform
               </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-normal md:text-5xl">
+              <h1 className="mt-4 text-4xl font-semibold text-foreground tracking-normal md:text-5xl">
                 {title}
               </h1>
-              <p className="mt-5 text-base leading-8 text-slate-300">
+              <p className="mt-5 text-base leading-8 text-slate-700">
                 {description}
               </p>
             </div>
@@ -64,8 +64,8 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
                     key={item.label}
                     className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4"
                   >
-                    <Icon className="h-5 w-5 text-blue-200" />
-                    <span className="text-sm font-semibold text-slate-100">
+                    <Icon className="h-5 w-5 text-slate-700" />
+                    <span className="text-sm font-semibold text-slate-700">
                       {item.label}
                     </span>
                   </div>
@@ -74,11 +74,11 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
             </div>
           </div>
           <div className="relative rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-            <p className="text-sm font-semibold text-white">Demo access</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
+            <p className="text-sm font-semibold text-foreground">Demo access</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
               Use any employee ID or email, choose Employee or Manager, and use
               an 8+ character password. Signup OTP is{" "}
-              <span className="font-semibold text-white">123456</span>.
+              <span className="font-semibold text-slate-700">123456</span>.
             </p>
           </div>
         </section>
@@ -86,14 +86,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
           <div className="w-full max-w-xl">{children}</div>
         </section>
       </div>
-      <div className="mx-auto mt-5 flex max-w-7xl justify-center gap-4 text-sm text-muted-foreground">
-        <Link href="/login" className="font-semibold text-primary">
-          Login
-        </Link>
-        <Link href="/signup" className="font-semibold text-primary">
-          Sign up
-        </Link>
-      </div>
+
     </main>
   );
 }

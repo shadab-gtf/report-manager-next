@@ -14,12 +14,12 @@ export default function ProfilePage() {
         </h1>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {[
-            ["Employee ID", "GTF-1042"],
-            ["Name", "Aarav Sharma"],
-            ["Designation", "Operations Associate"],
-            ["Department", "Operations"],
-            ["Reporting Manager", "Priya Menon"],
-            ["Official Email", "aarav.sharma@gtf.example"],
+            ["Employee ID", "GTF-1005"],
+            ["Name", "Kuldeep choudhary"],
+            ["Designation", "Software Engineer"],
+            ["Department", "Technology"],
+            ["Reporting Manager", "Saurabh Yadav"],
+            ["Official Email", "kuldeep.choudhary@gtftechnologies.com"],
           ].map(([label, value]) => (
             <div key={label} className="rounded-lg border border-border bg-background p-4">
               <p className="text-sm text-muted-foreground">{label}</p>

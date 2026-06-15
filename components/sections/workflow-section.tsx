@@ -9,7 +9,7 @@ export async function WorkflowSection({ pipeline }: WorkflowSectionProps) {
   const data = await pipeline;
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-lg hidden border border-border bg-card p-5 shadow-sm">
       <h2 className="text-xl font-semibold text-card-foreground">
         Today&apos;s Workflow
       </h2>

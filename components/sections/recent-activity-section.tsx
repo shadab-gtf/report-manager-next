@@ -12,7 +12,7 @@ export async function RecentActivitySection({
   const data = await recentReports;
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-lg hidden border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold text-card-foreground">
