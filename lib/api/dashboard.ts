@@ -18,7 +18,6 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   return {
     user: {
       name: "Kuldeep",
-      role: "Employee",
       department: "Operations",
       reportingManager: "Saurabh Yadav",
     },
