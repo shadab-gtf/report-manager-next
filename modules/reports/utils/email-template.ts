@@ -45,7 +45,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
   <title>Daily Report</title>
 </head>
 <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f1f5f9; color: #0f172a;">
-  <div style="max-w-4xl mx-auto background-color: #ffffff; max-width: 900px; margin: 0 auto; border: 1px solid #e2e8f0; font-size: 13px; line-height: 1.5;">
+  <div style="background-color: #ffffff; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; font-size: 12px; line-height: 1.5;">
     
     <!-- Top Header -->
     <div style="background-color: #212E4A; color: #ffffff; padding: 16px; padding-bottom: 8px; border-bottom: 4px solid #D8A036; text-align: center;">
@@ -58,7 +58,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
     <div style="padding: 24px;">
       
       <!-- Info Block -->
-      <table width="80%" align="center" style="border-collapse: collapse; font-size: 12px; margin-bottom: 24px;">
+      <table width="100%" align="center" style="border-collapse: collapse; font-size: 12px; margin-bottom: 24px;">
         <tr>
           <td style="border: 1px solid #cbd5e1; background-color: #f8f9fa; padding: 8px 16px; font-weight: 600; width: 25%; text-align: center;">Employee Name</td>
           <td style="border: 1px solid #cbd5e1; background-color: #e4eff6; padding: 8px 16px; width: 25%; text-align: center; color: #0056b3;">${data.employeeName}</td>
@@ -75,19 +75,19 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
 
       <!-- Task Log -->
       <div style="margin-bottom: 24px;">
-        <div style="background-color: #212E4A; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: 600; text-transform: uppercase;">
+        <div style="background-color: #212E4A; color: #ffffff; padding: 8px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
           Task Log
         </div>
-        <table width="100%" style="border-collapse: collapse; border: 1px solid #212E4A; font-size: 12px; text-align: center;">
+        <table width="100%" style="border-collapse: collapse; border: 1px solid #212E4A; font-size: 11px; text-align: center;">
           <thead style="background-color: #1A8377; color: #ffffff; font-weight: 600;">
             <tr>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px; width: 40px;">#</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px;">Task / Activity<br/>Description</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px;">Category</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px;">Priority</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px;">Status</th>
-              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 8px;">Time<br/>Spent (hrs)</th>
-              <th style="border: 1px solid #1A8377; padding: 8px;">% Done</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px; width: 30px;">#</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Task / Activity<br/>Description</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Category</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Priority</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Status</th>
+              <th style="border: 1px solid #1A8377; border-right: 1px solid #cbd5e1; padding: 6px;">Time<br/>Spent (hrs)</th>
+              <th style="border: 1px solid #1A8377; padding: 6px;">% Done</th>
             </tr>
           </thead>
           <tbody>
@@ -105,18 +105,18 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
 
       <!-- Meetings & Calls Log -->
       <div style="margin-bottom: 24px;">
-        <div style="background-color: #7A298F; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: 600; text-transform: uppercase;">
+        <div style="background-color: #7A298F; color: #ffffff; padding: 8px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">
           Meetings & Calls Log
         </div>
-        <table width="100%" style="border-collapse: collapse; border: 1px solid #7A298F; font-size: 12px; text-align: center;">
+        <table width="100%" style="border-collapse: collapse; border: 1px solid #7A298F; font-size: 11px; text-align: center;">
           <thead style="background-color: #7A298F; color: #ffffff; font-weight: 600;">
             <tr>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 8px; width: 40px;">#</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 8px;">Subject / Meeting<br/>Name</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 8px;">With Whom</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 8px;">Time</th>
-              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 8px;">Duration<br/>(min)</th>
-              <th style="border: 1px solid #7A298F; padding: 8px;">Type</th>
+              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px; width: 30px;">#</th>
+              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Subject / Meeting<br/>Name</th>
+              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">With Whom</th>
+              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Time</th>
+              <th style="border: 1px solid #7A298F; border-right: 1px solid #cbd5e1; padding: 6px;">Duration<br/>(min)</th>
+              <th style="border: 1px solid #7A298F; padding: 6px;">Type</th>
             </tr>
           </thead>
           <tbody>
