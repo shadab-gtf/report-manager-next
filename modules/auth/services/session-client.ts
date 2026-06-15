@@ -9,5 +9,6 @@ export function persistSession(session: AuthSession, rememberMe: boolean) {
 }
 
 function setCookie(name: string, value: string, maxAge: number) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=lax`;
+  const secure = window.location.protocol === 'https:' ? 'secure;' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=strict; ${secure}`;
 }

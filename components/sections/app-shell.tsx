@@ -52,8 +52,9 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
 
   const handleLogout = () => {
     window.localStorage.removeItem("report-manager-session");
-    document.cookie = "rm_session=; path=/; max-age=0; samesite=lax";
-    document.cookie = "rm_role=; path=/; max-age=0; samesite=lax";
+    const secure = window.location.protocol === 'https:' ? 'secure;' : '';
+    document.cookie = `rm_session=; path=/; max-age=0; samesite=strict; ${secure}`;
+    document.cookie = `rm_role=; path=/; max-age=0; samesite=strict; ${secure}`;
     dispatch(clearSession());
     router.push("/login");
   };
