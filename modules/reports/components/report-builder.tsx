@@ -42,19 +42,44 @@ export function ReportBuilder() {
   const emailSubject =
     draft.tasks.find((task) => task.description.trim().length > 0)?.description ??
     `Daily Report - ${draft.reportDate}`;
-  const employeeName = "Kuldeep";
-  const emailBody = buildEmailBody({
-    managerName,
-    employeeName,
-    reportDate: draft.reportDate,
-    totalHours,
-    tasks: draft.tasks,
-    meetings: draft.meetings,
-    pending: draft.notes.pending,
-    blockers: draft.notes.blockers,
-    tomorrowPlan: draft.notes.tomorrowPlan,
-  });
-  const mailToHref = `mailto:${managerEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+  const employeeName = session?.name || "Kuldeep";
+
+  const [isEmailing, setIsEmailing] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<string | null>(null);
+
+  async function handleSendHtmlEmail() {
+    setIsEmailing(true);
+    setEmailStatus(null);
+    try {
+      const response = await fetch('/api/send-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          managerEmail,
+          employeeName,
+          department: "Technology",
+          designation: "Software Engineer",
+          managerName,
+          reportDate: draft.reportDate,
+          totalHours,
+          tasks: draft.tasks,
+          meetings: draft.meetings,
+          pending: draft.notes.pending,
+          blockers: draft.notes.blockers,
+          tomorrowPlan: draft.notes.tomorrowPlan,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send");
+
+      setEmailStatus("Email sent successfully!");
+      submitReport();
+    } catch (error) {
+      setEmailStatus("Failed to send email. Please try again.");
+    } finally {
+      setIsEmailing(false);
+    }
+  }
 
   if (!isLoaded) {
     return (
@@ -287,36 +312,46 @@ export function ReportBuilder() {
                   <ReadOnlyField label="To" value={`${managerName} <${managerEmail}>`} />
                   <ReadOnlyField label="Subject" value={emailSubject} />
                 </div>
-                <label className="grid gap-2 text-sm font-semibold text-foreground">
-                  Email body
-                  <textarea
-                    readOnly
-                    value={emailBody}
-                    className="min-h-72 rounded-xl border border-input bg-background px-3 py-3 font-mono text-xs font-normal leading-5 outline-none"
-                  />
-                </label>
+                <div className="grid gap-2 text-sm font-semibold text-foreground">
+                  Email Format
+                  <div className="rounded-xl border border-input bg-primary/5 px-4 py-8 text-center text-primary flex flex-col items-center justify-center min-h-64">
+                    <svg className="mx-auto h-12 w-12 mb-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <p className="max-w-md font-medium text-sm">HTML version of your report will be generated and sent securely to your manager.</p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={submitReport}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                  disabled={isEmailing}
                 >
                   <PaperAirplaneIcon className="h-4 w-4" />
-                  {isOnline ? "Submit report" : "Queue offline submission"}
+                  {isOnline ? "Submit report only" : "Queue offline submission"}
                 </button>
-                <a
-                  href={mailToHref}
-                  onClick={submitReport}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted"
+                <button
+                  type="button"
+                  onClick={handleSendHtmlEmail}
+                  disabled={isEmailing || !isOnline}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50"
                 >
                   <EnvelopeIcon className="h-4 w-4" />
-                  Submit and email manager
-                </a>
+                  {isEmailing ? "Sending..." : "Submit and email manager"}
+                </button>
               </div>
-              <p className="mt-4 rounded-md bg-success-light w-fit px-3 py-2 text-sm font-semibold text-success">
-                Current status: {draft.status}
-              </p>
+              <div className="mt-4 flex items-center gap-3">
+                <p className="rounded-md bg-success-light w-fit px-3 py-2 text-sm font-semibold text-success">
+                  Current status: {draft.status}
+                </p>
+                {emailStatus && (
+                  <p className={`rounded-md w-fit px-3 py-2 text-sm font-semibold ${emailStatus.includes("Failed") ? "bg-red-100 text-red-700" : "bg-success-light text-success"}`}>
+                    {emailStatus}
+                  </p>
+                )}
+              </div>
             </div>
           ) : null}
         </motion.div>
@@ -361,7 +396,7 @@ function ReportPreview({
 }) {
   return (
     <article className="rounded-none border-0 bg-white text-slate-900 shadow-sm print:m-0 print:p-0 print:shadow-none w-full max-w-4xl mx-auto font-sans text-[13px] leading-relaxed">
-      
+
       {/* Top Header */}
       <header className="bg-[#212E4A] text-white p-4 pb-2 border-b-2 border-[#D8A036]">
         <div className="flex justify-center items-center">
@@ -407,11 +442,11 @@ function ReportPreview({
           <thead className="bg-[#1A8377] text-white font-semibold">
             <tr>
               <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2 w-10">#</th>
-              <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Task / Activity<br/>Description</th>
+              <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Task / Activity<br />Description</th>
               <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Category</th>
               <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Priority</th>
               <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Status</th>
-              <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Time<br/>Spent (hrs)</th>
+              <th className="border border-[#1A8377] border-r-slate-300 px-2 py-2">Time<br />Spent (hrs)</th>
               <th className="border border-[#1A8377] px-2 py-2">% Done</th>
             </tr>
           </thead>
@@ -464,10 +499,10 @@ function ReportPreview({
           <thead className="bg-[#7A298F] text-white font-semibold">
             <tr>
               <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2 w-10">#</th>
-              <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">Subject / Meeting<br/>Name</th>
+              <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">Subject / Meeting<br />Name</th>
               <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">With Whom</th>
               <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">Time</th>
-              <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">Duration<br/>(min)</th>
+              <th className="border border-[#7A298F] border-r-slate-300 px-2 py-2">Duration<br />(min)</th>
               <th className="border border-[#7A298F] px-2 py-2">Type</th>
             </tr>
           </thead>
@@ -497,7 +532,7 @@ function ReportPreview({
           </svg>
           End of Day Notes
         </div>
-        
+
         <PreviewNote title="Pending / Carry Forward:" value={draft.notes.pending} />
         <PreviewNote title="Blockers / Challenges Faced:" value={draft.notes.blockers} />
         <PreviewNote title="Plan for Tomorrow:" value={draft.notes.tomorrowPlan} />
