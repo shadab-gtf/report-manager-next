@@ -1,0 +1,130 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { loginWithMockApi } from "@/modules/auth/services/auth-service";
+import { persistSession } from "@/modules/auth/services/session-client";
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "@/modules/auth/schemas/auth-schemas";
+import { useAppDispatch } from "@/store/hooks";
+import { setSession } from "@/store/store";
+import { BiometricLoginButton } from "@/modules/auth/components/biometric-login-button";
+
+export function LoginForm() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [serverMessage, setServerMessage] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      identifier: "GTF-1042",
+      password: "password123",
+      role: "Employee",
+      rememberMe: true,
+    },
+  });
+
+  const watchedIdentifier = watch("identifier");
+  const watchedRole = watch("role");
+
+  async function onSubmit(values: LoginFormValues) {
+    const session = await loginWithMockApi(values.identifier, values.role);
+    dispatch(setSession(session));
+    persistSession(session, values.rememberMe);
+    setServerMessage("Session created. Redirecting to dashboard.");
+    router.push(values.role === "Manager" ? "/team" : "/dashboard");
+  }
+
+  return (
+    <form className="grid gap-5" onSubmit={handleSubmit(onSubmit)}>
+      <div className="rounded-xl border border-border bg-muted/60 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+          Secure workspace
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-card-foreground">
+          Sign in to Report Manager
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          Role-aware access for employee reports, manager review queues, and
+          offline-ready daily submissions.
+        </p>
+      </div>
+      <div>
+        <label className="text-sm font-semibold text-foreground" htmlFor="identifier">
+          Employee ID or email
+        </label>
+        <input
+          id="identifier"
+          className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+          {...register("identifier")}
+        />
+        {errors.identifier ? (
+          <p className="mt-1 text-sm text-danger">{errors.identifier.message}</p>
+        ) : null}
+      </div>
+      <div>
+        <label className="text-sm font-semibold text-foreground" htmlFor="role">
+          Workspace role
+        </label>
+        <select
+          id="role"
+          className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+          {...register("role")}
+        >
+          <option value="Employee">Employee</option>
+          <option value="Manager">Manager</option>
+        </select>
+      </div>
+      <div>
+        <label className="text-sm font-semibold text-foreground" htmlFor="password">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+          {...register("password")}
+        />
+        {errors.password ? (
+          <p className="mt-1 text-sm text-danger">{errors.password.message}</p>
+        ) : null}
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <input type="checkbox" className="h-4 w-4" {...register("rememberMe")} />
+          Remember me
+        </label>
+        <Link href="/forgot-password" className="text-sm font-semibold text-primary">
+          Forgot password?
+        </Link>
+      </div>
+      {serverMessage ? (
+        <p className="rounded-md bg-success-light px-3 py-2 text-sm font-semibold text-success">
+          {serverMessage}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="min-h-11 rounded-md bg-primary px-4 text-sm font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isSubmitting ? "Signing in..." : "Sign in"}
+      </button>
+
+      <BiometricLoginButton
+        identifier={watchedIdentifier}
+        role={watchedRole}
+      />
+    </form>
+  );
+}
