@@ -43,7 +43,11 @@ export function LoginForm() {
       dispatch(setSession(session));
       persistSession(session, values.rememberMe);
       setServerMessage("Session created. Redirecting to dashboard.");
-      router.push("/dashboard");
+      if (session.role === "manager") {
+        router.push("/dashboard/manager");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setServerMessage(err.message || "Invalid credentials. Try 'password123'.");
     }

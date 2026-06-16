@@ -4,6 +4,7 @@ import { verifyToken } from "@/lib/security/cookie-signer";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookieVal = request.cookies.get("rm_session")?.value;
+  const roleVal = request.cookies.get("rm_role")?.value || "employee";
   
   // Cryptographically verify the session token signature
   const employeeId = cookieVal ? await verifyToken(cookieVal) : null;
@@ -12,11 +13,13 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
     if (employeeId) {
-      response = NextResponse.redirect(new URL("/dashboard", request.url));
+      const target = roleVal === "manager" ? "/dashboard/manager" : "/dashboard";
+      response = NextResponse.redirect(new URL(target, request.url));
     }
   } else if (
     pathname === "/" ||
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/manager") ||
     pathname.startsWith("/reports") ||
     pathname.startsWith("/profile")
   ) {
@@ -24,8 +27,21 @@ export async function proxy(request: NextRequest) {
       response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("rm_session");
       response.cookies.delete("rm_role");
-    } else if (pathname === "/") {
-      response = NextResponse.redirect(new URL("/dashboard", request.url));
+    } else {
+      if (pathname === "/") {
+        const target = roleVal === "manager" ? "/dashboard/manager" : "/dashboard";
+        response = NextResponse.redirect(new URL(target, request.url));
+      } else if (roleVal === "manager") {
+        // Manager shouldn't access employee-only pages
+        if (pathname === "/dashboard" || (pathname.startsWith("/reports") && !pathname.startsWith("/manager/reports"))) {
+          response = NextResponse.redirect(new URL("/dashboard/manager", request.url));
+        }
+      } else {
+        // Employee shouldn't access manager pages
+        if (pathname.startsWith("/dashboard/manager") || pathname.startsWith("/manager")) {
+          response = NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+      }
     }
   }
 
@@ -44,6 +60,7 @@ export const config = {
   matcher: [
     "/",
     "/dashboard/:path*",
+    "/manager/:path*",
     "/reports/:path*",
     "/profile/:path*",
     "/login",

@@ -11,6 +11,7 @@ export interface EmployeeProfile {
   reportingManager: string;
   reportingManagerEmail: string;
   mobileNumber: string;
+  role: "employee" | "manager";
 }
 
 export const mockEmployees: Record<string, EmployeeProfile> = {
@@ -23,6 +24,7 @@ export const mockEmployees: Record<string, EmployeeProfile> = {
     reportingManager: "Saurabh Yadav",
     reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
     mobileNumber: "9876543210",
+    role: "employee",
   },
   "GTF-1005": {
     employeeId: "GTF-1005",
@@ -33,28 +35,47 @@ export const mockEmployees: Record<string, EmployeeProfile> = {
     reportingManager: "Saurabh Yadav",
     reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
     mobileNumber: "9876543211",
+    role: "employee",
+  },
+  "MGR-1001": {
+    employeeId: "MGR-1001",
+    name: "Saurabh Yadav",
+    email: "saurabh.yadav@gtftechnologies.com",
+    designation: "Engineering Manager",
+    department: "Technology",
+    reportingManager: "VP of Engineering",
+    reportingManagerEmail: "vp@gtftechnologies.com",
+    mobileNumber: "9876543212",
+    role: "manager",
   },
 };
 
 export function getEmployeeProfile(identifier: string): EmployeeProfile {
   const cleanId = identifier.includes("@")
-    ? (identifier.toLowerCase().includes("kuldeep.choudhary") ? "GTF-1042" : "GTF-1005")
+    ? (identifier.toLowerCase().includes("saurabh.yadav") || identifier.toLowerCase().includes("manager")
+        ? "MGR-1001"
+        : (identifier.toLowerCase().includes("kuldeep.choudhary") ? "GTF-1042" : "GTF-1005"))
     : identifier;
 
   if (mockEmployees[cleanId]) {
     return mockEmployees[cleanId];
   }
 
+  const isManager = cleanId.startsWith("MGR-") || cleanId.toLowerCase().includes("manager");
+
   // Dynamic profile fallback for new registrations
   return {
     employeeId: cleanId,
-    name: cleanId.split("-")[1] ? `User ${cleanId.split("-")[1]}` : "Employee User",
+    name: cleanId.split("-")[1]
+      ? `${isManager ? "Manager" : "User"} ${cleanId.split("-")[1]}`
+      : (isManager ? "Manager User" : "Employee User"),
     email: `${cleanId.toLowerCase()}@gtftechnologies.com`,
-    designation: "Software Engineer",
+    designation: isManager ? "Engineering Manager" : "Software Engineer",
     department: "Technology",
-    reportingManager: "Saurabh Yadav",
-    reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
+    reportingManager: isManager ? "VP of Engineering" : "Saurabh Yadav",
+    reportingManagerEmail: isManager ? "vp@gtftechnologies.com" : "saurabh.yadav@gtftechnologies.com",
     mobileNumber: "9999999999",
+    role: isManager ? "manager" : "employee",
   };
 }
 
@@ -93,7 +114,7 @@ export async function POST(request: Request) {
       httpOnly: false, // httpOnly is false because client Redux reads cookie presence (but it is signed, so protected against tampering!)
     });
 
-    cookieStore.set("rm_role", "employee", {
+    cookieStore.set("rm_role", profile.role, {
       path: "/",
       maxAge,
       sameSite: "strict",
@@ -106,6 +127,7 @@ export async function POST(request: Request) {
       email: profile.email,
       reportingManager: profile.reportingManager,
       reportingManagerEmail: profile.reportingManagerEmail,
+      role: profile.role,
     });
   } catch (error) {
     console.error("Login API Error:", error);

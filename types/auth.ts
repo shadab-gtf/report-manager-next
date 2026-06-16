@@ -25,4 +25,5 @@ export interface AuthSession {
   email: string;
   reportingManager: string;
   reportingManagerEmail: string;
+  role: "employee" | "manager";
 }

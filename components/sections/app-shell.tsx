@@ -12,6 +12,8 @@ import {
   HomeIcon,
   UserCircleIcon,
   XMarkIcon,
+  UsersIcon,
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,6 +35,15 @@ const navigationItems = [
   { label: "Profile", href: "/profile", segment: "profile", icon: UserCircleIcon },
 ];
 
+const managerNavigationItems = [
+  { label: "Dashboard", href: "/dashboard/manager", segment: "dashboard/manager", icon: HomeIcon },
+  { label: "My Team", href: "/manager/team", segment: "manager/team", icon: UsersIcon },
+  { label: "Team Reports", href: "/manager/reports", segment: "manager/reports", icon: ClipboardDocumentListIcon },
+  { label: "Missing Reports", href: "/manager/missing-reports", segment: "manager/missing-reports", icon: ExclamationCircleIcon },
+  { label: "Analytics", href: "/manager/analytics", segment: "manager/analytics", icon: ChartBarSquareIcon },
+  { label: "Profile", href: "/profile", segment: "profile", icon: UserCircleIcon },
+];
+
 interface AppShellProps {
   children: React.ReactNode;
   activeSegment?: string;
@@ -45,9 +56,13 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
   const collapsed = useAppSelector((state) => state.ui.sidebarCollapsed);
   const session = useAppSelector((state) => state.auth.session);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isManager = session?.role === "manager";
+  const navigation = isManager ? managerNavigationItems : navigationItems;
+
   const segment =
-    activeSegment ?? navigationItems.find((item) => pathname.startsWith(item.href))?.segment ?? "dashboard";
-  const name = session?.name ?? "Employee";
+    activeSegment ?? navigation.find((item) => pathname.startsWith(item.href))?.segment ?? "dashboard";
+  const name = session?.name ?? (isManager ? "Manager" : "Employee");
 
   const handleLogout = () => {
     window.localStorage.removeItem("report-manager-session");
@@ -69,10 +84,11 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
           <SidebarContent
             collapsed={collapsed}
             segment={segment}
-            navigation={navigationItems}
+            navigation={navigation}
             onToggle={() => dispatch(toggleSidebar())}
             onLogout={handleLogout}
             name={name}
+            isManager={isManager}
           />
         </aside>
 
@@ -88,10 +104,11 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
               <SidebarContent
                 collapsed={false}
                 segment={segment}
-                navigation={navigationItems}
+                navigation={navigation}
                 onToggle={() => setMobileOpen(false)}
                 onLogout={handleLogout}
                 name={name}
+                isManager={isManager}
                 mobileClose
               />
             </aside>
@@ -118,18 +135,20 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-base font-medium text-foreground">
-                    Employee Workspace
+                    {isManager ? "Manager Workspace" : "Employee Workspace"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <InstallPrompt />
-                <Link
-                  href="/reports/create"
-                  className="inline-flex min-h-10 items-center rounded bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  Create Report
-                </Link>
+                {!isManager ? (
+                  <Link
+                    href="/reports/create"
+                    className="inline-flex min-h-10 items-center rounded bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    Create Report
+                  </Link>
+                ) : null}
               </div>
             </div>
           </header>
@@ -149,6 +168,7 @@ function SidebarContent({
   onToggle,
   onLogout,
   name,
+  isManager,
   mobileClose = false,
 }: {
   collapsed: boolean;
@@ -157,12 +177,13 @@ function SidebarContent({
   onToggle: () => void;
   onLogout: () => void;
   name: string;
+  isManager: boolean;
   mobileClose?: boolean;
 }) {
   return (
     <div className="flex h-full flex-col py-4">
       <div className={`flex items-center px-4 ${collapsed ? "justify-center" : "justify-between"}`}>
-        <Link href="/dashboard" className="flex min-w-0 items-center gap-3">
+        <Link href={isManager ? "/dashboard/manager" : "/dashboard"} className="flex min-w-0 items-center gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center">
             <Image
               src="/brand-logo.svg"
@@ -200,7 +221,7 @@ function SidebarContent({
       <nav aria-label="Primary navigation" className="mt-6 grid gap-1 pr-4">
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active = item.segment === segment;
+          const active = item.segment === segment || (item.segment !== "profile" && segment.startsWith(item.segment));
           return (
             <Link
               key={item.href}
