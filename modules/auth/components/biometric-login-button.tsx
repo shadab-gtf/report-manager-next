@@ -5,27 +5,16 @@ import { useRouter } from "next/navigation";
 import {
   getWebAuthnCapability,
   authenticateWithPasskey,
-  registerPasskey,
   type WebAuthnCapability,
 } from "@/modules/auth/services/webauthn-service";
+import { isBiometricEnabled } from "@/modules/auth/services/biometric-preferences";
 import { persistSession } from "@/modules/auth/services/session-client";
 import { useAppDispatch } from "@/store/hooks";
 import { setSession } from "@/store/store";
-import Link from "next/link";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
-type BiometricState =
-  | "idle"
-  | "authenticating"
-  | "registering"
-  | "success"
-  | "error";
-
-interface BiometricLoginButtonProps {
-  /** Current identifier value from the login form */
-  identifier: string;
-}
+type BiometricState = "idle" | "authenticating" | "success" | "error";
 
 /* ─── Icons (inline SVG to avoid extra dependencies) ─────────── */
 
@@ -107,8 +96,6 @@ const BUTTON_VARIANT: Record<BiometricState, string> = {
   idle: "border-primary/20 bg-primary/[0.06] text-primary hover:bg-primary/[0.12] hover:border-primary/30 active:scale-[0.98]",
   authenticating:
     "border-primary/30 bg-primary/[0.08] text-primary cursor-wait",
-  registering:
-    "border-primary/30 bg-primary/[0.08] text-primary cursor-wait",
   success:
     "border-success/30 bg-success/[0.08] text-success cursor-default",
   error:
@@ -117,22 +104,36 @@ const BUTTON_VARIANT: Record<BiometricState, string> = {
 
 /* ─── Component ──────────────────────────────────────────────── */
 
-export function BiometricLoginButton({
-  identifier,
-}: BiometricLoginButtonProps) {
+/**
+ * Biometric login button shown on the login page.
+ *
+ * **Gate logic**: This button only renders when ALL of these are true:
+ * 1. Browser supports WebAuthn
+ * 2. User has explicitly enabled biometrics from their profile
+ * 3. A passkey credential exists on this device
+ *
+ * This ensures biometric login NEVER works before the user has
+ * first authenticated with username + password and enabled it
+ * from the profile settings.
+ */
+export function BiometricLoginButton() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const [capability, setCapability] = useState<WebAuthnCapability>({
-    supported: false,
-    hasCredential: false,
-  });
+  const [visible, setVisible] = useState(false);
   const [state, setState] = useState<BiometricState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  /* Check capability on mount (client-only) */
+  /* Check all 3 gates on mount (client-only) */
   useEffect(() => {
-    setCapability(getWebAuthnCapability());
+    const capability = getWebAuthnCapability();
+    const biometricPrefEnabled = isBiometricEnabled();
+
+    setVisible(
+      capability.supported &&
+      capability.hasCredential &&
+      biometricPrefEnabled
+    );
   }, []);
 
   /* ─── Authenticate with stored passkey ──────────────────── */
@@ -145,7 +146,12 @@ export function BiometricLoginButton({
       dispatch(setSession(session));
       persistSession(session, true);
       setState("success");
-      router.push("/dashboard");
+
+      if (session.role === "manager") {
+        router.push("/dashboard/manager");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Biometric authentication failed.";
@@ -154,36 +160,12 @@ export function BiometricLoginButton({
     }
   }, [dispatch, router]);
 
-  /* ─── Register a new passkey ────────────────────────────── */
-  const handleRegister = useCallback(async () => {
-    if (!identifier || identifier.length < 3) {
-      setErrorMessage("Enter your Employee ID first, then set up biometrics.");
-      setState("error");
-      return;
-    }
-
-    setState("registering");
-    setErrorMessage(null);
-
-    try {
-      await registerPasskey(identifier);
-      setCapability(getWebAuthnCapability());
-      setState("idle");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Biometric setup failed.";
-      setErrorMessage(message);
-      setState("error");
-    }
-  }, [identifier]);
-
-  /* ─── Don't render when WebAuthn is unsupported ─────────── */
-  if (!capability.supported) {
+  /* ─── Don't render unless all gates pass ────────────────── */
+  if (!visible) {
     return null;
   }
 
-  const isProcessing = state === "authenticating" || state === "registering";
-  const hasCredential = capability.hasCredential;
+  const isProcessing = state === "authenticating";
 
   /* ─── Choose icon based on platform ─────────────────────── */
   const isApple =
@@ -195,27 +177,22 @@ export function BiometricLoginButton({
 
   return (
     <div className="grid gap-2">
-
       {/* ── Divider ── */}
       <div className="flex items-center gap-3" role="separator">
         <span className="h-px flex-1 bg-border" />
         <span className="text-xs font-medium tracking-wide text-muted-foreground">
-          {hasCredential ? "Quick sign in" : "Or use biometrics"}
+          Quick sign in
         </span>
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      {/* ── Action button ── */}
+      {/* ── Authenticate button ── */}
       <button
         type="button"
         disabled={isProcessing}
-        aria-label={
-          hasCredential
-            ? "Sign in with biometrics"
-            : "Set up biometric login"
-        }
+        aria-label="Sign in with biometrics"
         className={`${BUTTON_BASE} ${BUTTON_VARIANT[state]}`}
-        onClick={hasCredential ? handleAuthenticate : handleRegister}
+        onClick={handleAuthenticate}
       >
         {state === "success" ? (
           <CheckIcon className="h-5 w-5" />
@@ -224,31 +201,26 @@ export function BiometricLoginButton({
         )}
 
         {/* ── Spinner overlay ── */}
-        {isProcessing && (
+        {isProcessing ? (
           <span className="absolute right-4">
             <span className="block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
           </span>
-        )}
+        ) : null}
 
         <span>
           {state === "authenticating" && "Verifying..."}
-          {state === "registering" && "Setting up..."}
           {state === "success" && "Authenticated"}
-          {state === "idle" &&
-            (hasCredential
-              ? "Sign in with Face ID / Fingerprint"
-              : "Enable biometric login")}
-          {state === "error" &&
-            (hasCredential ? "Retry biometric login" : "Retry setup")}
+          {state === "idle" && "Sign in with Face ID / Fingerprint"}
+          {state === "error" && "Retry biometric login"}
         </span>
       </button>
 
       {/* ── Error feedback ── */}
-      {errorMessage && (
+      {errorMessage ? (
         <p className="text-center text-xs text-danger" role="alert">
           {errorMessage}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

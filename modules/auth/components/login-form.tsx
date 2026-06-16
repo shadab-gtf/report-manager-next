@@ -23,7 +23,6 @@ export function LoginForm() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -33,8 +32,6 @@ export function LoginForm() {
       rememberMe: true,
     },
   });
-
-  const watchedIdentifier = watch("identifier");
 
   async function onSubmit(values: LoginFormValues) {
     setServerMessage(null);
@@ -120,9 +117,7 @@ export function LoginForm() {
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
 
-      <BiometricLoginButton
-        identifier={watchedIdentifier}
-      />
+      <BiometricLoginButton />
       
       <div className="mt-4 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
