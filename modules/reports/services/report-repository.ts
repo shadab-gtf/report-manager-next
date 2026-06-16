@@ -1,3 +1,4 @@
+import { reportDb } from "@/modules/reports/services/report-db";
 import type {
   DailyReportDraft,
   ReportHistoryFilters,
@@ -59,10 +60,30 @@ const seedReports: DailyReportDraft[] = [
 ];
 
 export async function listReports(
-  filters: ReportHistoryFilters,
+  filters: ReportHistoryFilters & { sortDirection?: "asc" | "desc" }
 ): Promise<ReportHistoryResult> {
+  let dbReports: DailyReportDraft[] = [];
+
+  if (typeof window !== "undefined") {
+    try {
+      // Retrieve locally saved drafts, queued, or submitted reports
+      const localRecords = await reportDb.drafts.toArray();
+      // Exclude the active editing draft
+      dbReports = localRecords.filter((r) => r.id !== "current-draft");
+    } catch (error) {
+      console.error("Failed to fetch local reports from IndexedDB:", error);
+    }
+  }
+
+  // De-duplicate by ID (in case seed reports are saved in IndexedDB as well)
+  const reportMap = new Map<string, DailyReportDraft>();
+  seedReports.forEach((r) => reportMap.set(r.id, r));
+  dbReports.forEach((r) => reportMap.set(r.id, r));
+
+  const allReports = Array.from(reportMap.values());
   const normalizedQuery = filters.query.trim().toLowerCase();
-  const filtered = seedReports.filter((report) => {
+
+  const filtered = allReports.filter((report) => {
     const statusMatches =
       filters.status === "All" || report.status === filters.status;
     const queryMatches =
@@ -73,19 +94,54 @@ export async function listReports(
     return statusMatches && queryMatches;
   });
 
+  // Sort by reportDate
+  const sortDir = filters.sortDirection || "desc";
+  filtered.sort((a, b) =>
+    sortDir === "desc"
+      ? b.reportDate.localeCompare(a.reportDate)
+      : a.reportDate.localeCompare(b.reportDate)
+  );
+
+  const pageSize = 10;
+  const startIndex = (filters.page - 1) * pageSize;
+  const paginated = filtered.slice(startIndex, startIndex + pageSize);
+
   return {
-    reports: filtered,
+    reports: paginated,
     total: filtered.length,
-    pageSize: 10,
+    pageSize,
   };
 }
 
 export async function getReportById(
   reportId: string,
 ): Promise<DailyReportDraft | null> {
+  if (typeof window !== "undefined") {
+    const local = await reportDb.drafts.get(reportId);
+    if (local) return local;
+  }
   return seedReports.find((report) => report.id === reportId) ?? null;
 }
 
 export function getSeedReports(): DailyReportDraft[] {
   return seedReports;
 }
+
+export function getLocalDateString(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export async function copyReportToDraft(report: DailyReportDraft): Promise<void> {
+  if (typeof window !== "undefined") {
+    await reportDb.drafts.put({
+      ...report,
+      id: "current-draft",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+}
+

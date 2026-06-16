@@ -3,12 +3,5 @@
 import type { AuthSession } from "@/types/auth";
 
 export function persistSession(session: AuthSession, rememberMe: boolean) {
-  const maxAge = rememberMe ? 2_592_000 : 86_400;
   window.localStorage.setItem("report-manager-session", JSON.stringify(session));
-  setCookie("rm_session", session.employeeId, maxAge);
-}
-
-function setCookie(name: string, value: string, maxAge: number) {
-  const secure = window.location.protocol === 'https:' ? 'secure;' : '';
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=strict; ${secure}`;
 }

@@ -13,11 +13,6 @@ const reportLinks = [
     description: "Multi-step task, meeting, notes, preview, and submit flow.",
   },
   {
-    href: "/reports/drafts",
-    title: "Recover drafts",
-    description: "IndexedDB-backed autosaved drafts and queued submissions.",
-  },
-  {
     href: "/reports/history",
     title: "Report history",
     description: "Search, filter, sort, and review submitted reports.",

@@ -62,11 +62,6 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
         description: "Start today's daily reporting workflow.",
       },
       {
-        label: "Continue Draft",
-        href: "/reports/drafts",
-        description: "Resume the latest offline-safe draft.",
-      },
-      {
         label: "View History",
         href: "/reports/history",
         description: "Search submitted reports and approvals.",

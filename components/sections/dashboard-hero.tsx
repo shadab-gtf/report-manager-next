@@ -23,7 +23,7 @@ export function DashboardHero({ overview }: DashboardHeroProps) {
   const greeting = getGreeting();
   return (
     <section className="rounded border border-border bg-card">
-      <div className="grid gap-0 xl:grid-cols-[1fr_420px]">
+      <div className="grid gap-0 xl:grid-cols-[1fr]">
         <div className="p-6">
           <div className="flex flex-wrap items-center gap-3">
             <StatusPill status={overview.reportingStatus}>
@@ -52,28 +52,7 @@ export function DashboardHero({ overview }: DashboardHeroProps) {
             ))}
           </div>
         </div>
-        <div className="border-t border-border bg-slate-50 p-6 xl:border-l xl:border-t-0">
-          <p className="text-sm font-semibold text-foreground">Today&apos;s command center</p>
-          <div className="mt-5 grid gap-3">
-            {[
-              ["Draft health", "Autosave active every few seconds", CheckCircleIcon],
-              ["Manager routing", `Reports route to ${overview.user.reportingManager}`, EnvelopeIcon],
-              ["Time capture", "Task hours roll into daily totals", ClockIcon],
-            ].map(([title, body, Icon]) => (
-              <div key={title as string} className="rounded-2xl border border-border bg-white p-4">
-                <div className="flex gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{title as string}</p>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">{body as string}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
     </section>
   );

@@ -97,13 +97,14 @@ function EmployeeInfoStep({
 }: {
   onComplete: (values: EmployeeInfoValues) => void;
 }) {
+  const isDev = process.env.NODE_ENV === "development";
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<EmployeeInfoValues>({
     resolver: zodResolver(employeeInfoSchema),
-    defaultValues: {
+    defaultValues: isDev ? {
       employeeId: "GTF-1042",
       fullName: "Kuldeep",
       designation: "Operations Associate",
@@ -111,6 +112,14 @@ function EmployeeInfoStep({
       reportingManager: "Saurabh Yadav",
       officialEmail: "kuldeep.choudhary@gtftechnologies.com",
       mobileNumber: "9876543210",
+    } : {
+      employeeId: "",
+      fullName: "",
+      designation: "",
+      department: "",
+      reportingManager: "",
+      officialEmail: "",
+      mobileNumber: "",
     },
   });
 
@@ -139,6 +148,7 @@ function SecurityStep({
   onComplete: () => Promise<void>;
 }) {
   const [isVisible, setIsVisible] = useState(false);
+  const isDev = process.env.NODE_ENV === "development";
   const {
     register,
     handleSubmit,
@@ -146,10 +156,21 @@ function SecurityStep({
     control,
   } = useForm<SecurityValues>({
     resolver: zodResolver(securitySchema),
-    defaultValues: { password: "password123", confirmPassword: "password123" },
+    defaultValues: isDev
+      ? { password: "password123", confirmPassword: "password123" }
+      : { password: "", confirmPassword: "" },
   });
   const password = useWatch({ control, name: "password" });
-  const strength = useMemo(() => Math.min(100, password.length * 10), [password]);
+  const strength = useMemo(() => {
+    if (!password) return 0;
+    let score = 0;
+    if (password.length >= 8) score += 20;
+    if (password.length >= 12) score += 20;
+    if (/[A-Z]/.test(password)) score += 20;
+    if (/[0-9]/.test(password)) score += 20;
+    if (/[^A-Za-z0-9]/.test(password)) score += 20;
+    return score;
+  }, [password]);
 
   return (
     <form className="grid gap-4" onSubmit={handleSubmit(onComplete)}>
@@ -198,13 +219,14 @@ function OtpStep({
   onComplete: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
+  const isDev = process.env.NODE_ENV === "development";
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<OtpValues>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { otp: "123456" },
+    defaultValues: isDev ? { otp: "123456" } : { otp: "" },
   });
 
   async function submit(values: OtpValues) {
@@ -284,7 +306,7 @@ function Field({
   type = "text",
 }: {
   label: string;
-  registration: UseFormRegisterReturn<any>;
+  registration: UseFormRegisterReturn<string>;
   error?: string;
   type?: string;
 }) {
@@ -308,7 +330,7 @@ function SelectField({
   options,
 }: {
   label: string;
-  registration: UseFormRegisterReturn<any>;
+  registration: UseFormRegisterReturn<string>;
   error?: string;
   options: string[];
 }) {

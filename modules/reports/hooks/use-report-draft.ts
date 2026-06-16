@@ -11,9 +11,10 @@ import { reportDb } from "@/modules/reports/services/report-db";
 import { useNotificationStore } from "@/modules/notifications/store/notification-store";
 import type { DailyReportDraft, MeetingLogItem, TaskLogItem } from "@/types/report";
 import { createId } from "@/lib/utils/format";
+import { getLocalDateString } from "@/modules/reports/services/report-repository";
 
 function createEmptyDraft(): DailyReportDraft {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getLocalDateString();
 
   return {
     id: "current-draft",
@@ -88,9 +89,20 @@ export function useReportDraft() {
       if (!isMounted) {
         return;
       }
+      const todayStr = getLocalDateString();
       if (savedDraft) {
-        setDraft(savedDraft);
-        setLastSavedAt(savedDraft.updatedAt);
+        if (savedDraft.reportDate !== todayStr) {
+          const freshDraft = createEmptyDraft();
+          setDraft(freshDraft);
+          reportDb.drafts.put(freshDraft);
+        } else {
+          setDraft(savedDraft);
+          setLastSavedAt(savedDraft.updatedAt);
+        }
+      } else {
+        const freshDraft = createEmptyDraft();
+        setDraft(freshDraft);
+        reportDb.drafts.put(freshDraft);
       }
       setIsLoaded(true);
     });
@@ -200,8 +212,10 @@ export function useReportDraft() {
   }, []);
 
   const submitReport = useCallback(async () => {
+    const reportId = `report-${draft.reportDate}`;
     const submittedDraft: DailyReportDraft = {
       ...draft,
+      id: reportId,
       status: isOnline ? "Submitted" : "Queued",
       submittedAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -214,8 +228,16 @@ export function useReportDraft() {
       await reportDb.drafts.put(submittedDraft);
     }
 
-    setDraft(submittedDraft);
-    setLastSavedAt(submittedDraft.updatedAt);
+    const updatedCurrentDraft: DailyReportDraft = {
+      ...draft,
+      status: isOnline ? "Submitted" : "Queued",
+      submittedAt: submittedDraft.submittedAt,
+      updatedAt: submittedDraft.updatedAt,
+    };
+    await reportDb.drafts.put(updatedCurrentDraft);
+
+    setDraft(updatedCurrentDraft);
+    setLastSavedAt(updatedCurrentDraft.updatedAt);
     addNotification({
       title: isOnline ? "Report submitted" : "Report queued",
       message: isOnline

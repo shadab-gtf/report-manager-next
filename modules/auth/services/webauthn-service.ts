@@ -52,6 +52,8 @@ export function getWebAuthnCapability(): WebAuthnCapability {
  * Simulates the backend `POST /api/auth/webauthn/generate-registration-options`
  * endpoint. Replace the body of this function with a real API call when ready.
  */
+const RP_ID = process.env.NEXT_PUBLIC_WEBAUTHN_RP_ID || (typeof window !== "undefined" ? window.location.hostname : "localhost");
+
 function generateMockRegistrationOptions(
   identifier: string,
 ): PublicKeyCredentialCreationOptionsJSON {
@@ -59,7 +61,7 @@ function generateMockRegistrationOptions(
     challenge: btoa(crypto.getRandomValues(new Uint8Array(32)).toString()),
     rp: {
       name: "Report Manager",
-      id: window.location.hostname,
+      id: RP_ID,
     },
     user: {
       id: btoa(identifier),
@@ -81,16 +83,12 @@ function generateMockRegistrationOptions(
   };
 }
 
-/**
- * Simulates the backend `POST /api/auth/webauthn/generate-authentication-options`
- * endpoint. Replace the body with a real API call when ready.
- */
 function generateMockAuthenticationOptions(
   credentialId: string,
 ): PublicKeyCredentialRequestOptionsJSON {
   return {
     challenge: btoa(crypto.getRandomValues(new Uint8Array(32)).toString()),
-    rpId: window.location.hostname,
+    rpId: RP_ID,
     timeout: 60_000,
     userVerification: "required",
     allowCredentials: [
@@ -105,14 +103,6 @@ function generateMockAuthenticationOptions(
 
 /* ─── Public API ── */
 
-/**
- * Registers a new platform authenticator (Face ID / fingerprint / PIN)
- * for the given user. Persists the credential ID to localStorage.
- *
- * Must be called from a direct user gesture (click handler).
- *
- * @throws Error if registration is cancelled or fails.
- */
 export async function registerPasskey(
   identifier: string,
 ): Promise<void> {
@@ -120,7 +110,6 @@ export async function registerPasskey(
 
   const registration = await startRegistration({ optionsJSON: options });
 
-  // Persist credential ID and user info for future authentications
   window.localStorage.setItem(CREDENTIAL_STORE_KEY, registration.id);
   window.localStorage.setItem(
     REGISTERED_USER_KEY,
@@ -128,14 +117,6 @@ export async function registerPasskey(
   );
 }
 
-/**
- * Authenticates using a previously-registered platform credential.
- *
- * Returns the stored `AuthSession` on success.
- * Must be called from a direct user gesture (click handler).
- *
- * @throws Error if no credential is stored, or the user cancels.
- */
 export async function authenticateWithPasskey(): Promise<{
   session: AuthSession;
 }> {
@@ -155,14 +136,19 @@ export async function authenticateWithPasskey(): Promise<{
 
   await startAuthentication({ optionsJSON: options });
 
-  const session: AuthSession = {
-    employeeId: identifier.includes("@") ? "GTF-1042" : identifier,
-    name: "Kuldeep",
-    email: identifier.includes("@") ? identifier : "kuldeep.choudhary@gtftechnologies.com",
-    reportingManager: "Saurabh Yadav",
-    reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
-  };
+  // Call the server API to set secure cryptographically signed cookies
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier, bypassPassword: true }),
+  });
 
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Passkey authentication failed on server.");
+  }
+
+  const session: AuthSession = await response.json();
   return { session };
 }
 

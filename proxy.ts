@@ -1,20 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { verifyToken } from "@/lib/security/cookie-signer";
 
-const publicRoutes = new Set([
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/verify-email",
-]);
-
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const session = request.cookies.get("rm_session")?.value;
+  const cookieVal = request.cookies.get("rm_session")?.value;
+  
+  // Cryptographically verify the session token signature
+  const employeeId = cookieVal ? await verifyToken(cookieVal) : null;
 
   let response = NextResponse.next();
 
   if (pathname.startsWith("/login") || pathname.startsWith("/signup")) {
-    if (session) {
+    if (employeeId) {
       response = NextResponse.redirect(new URL("/dashboard", request.url));
     }
   } else if (
@@ -23,21 +20,25 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/reports") ||
     pathname.startsWith("/profile")
   ) {
-    if (!session) {
+    if (!employeeId) {
       response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("rm_session");
+      response.cookies.delete("rm_role");
     } else if (pathname === "/") {
       response = NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
   // Apply strict security headers to all responses
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
   return response;
 }
+
+export default proxy;
 
 export const config = {
   matcher: [

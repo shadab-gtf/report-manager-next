@@ -2,18 +2,21 @@ import type { AuthSession, SignupEmployeeInfo } from "@/types/auth";
 
 export async function loginWithMockApi(
   identifier: string,
+  password?: string,
+  rememberMe: boolean = true
 ): Promise<AuthSession> {
-  await new Promise((resolve) => {
-    setTimeout(resolve, 500);
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier, password, rememberMe }),
   });
 
-  return {
-    employeeId: identifier.includes("@") ? "GTF-1042" : identifier,
-    name: "Kuldeep",
-    email: identifier.includes("@") ? identifier : "kuldeep.choudhary@gtftechnologies.com",
-    reportingManager: "Saurabh Yadav",
-    reportingManagerEmail: "saurabh.yadav@gtftechnologies.com",
-  };
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Authentication failed. Try 'password123'.");
+  }
+
+  return response.json();
 }
 
 export async function sendSignupOtp(

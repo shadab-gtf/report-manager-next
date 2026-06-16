@@ -19,6 +19,7 @@ export function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [serverMessage, setServerMessage] = useState<string | null>(null);
+  const isDev = process.env.NODE_ENV === "development";
   const {
     register,
     handleSubmit,
@@ -27,8 +28,8 @@ export function LoginForm() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      identifier: "GTF-1042",
-      password: "password123",
+      identifier: isDev ? "GTF-1042" : "",
+      password: isDev ? "password123" : "",
       rememberMe: true,
     },
   });
@@ -36,11 +37,16 @@ export function LoginForm() {
   const watchedIdentifier = watch("identifier");
 
   async function onSubmit(values: LoginFormValues) {
-    const session = await loginWithMockApi(values.identifier);
-    dispatch(setSession(session));
-    persistSession(session, values.rememberMe);
-    setServerMessage("Session created. Redirecting to dashboard.");
-    router.push("/dashboard");
+    setServerMessage(null);
+    try {
+      const session = await loginWithMockApi(values.identifier, values.password, values.rememberMe);
+      dispatch(setSession(session));
+      persistSession(session, values.rememberMe);
+      setServerMessage("Session created. Redirecting to dashboard.");
+      router.push("/dashboard");
+    } catch (err: any) {
+      setServerMessage(err.message || "Invalid credentials. Try 'password123'.");
+    }
   }
 
   return (
@@ -94,7 +100,11 @@ export function LoginForm() {
         </Link>
       </div>
       {serverMessage ? (
-        <p className="rounded-md bg-success-light px-3 py-2 text-sm font-semibold text-success">
+        <p className={`rounded-md px-3 py-2 text-sm font-semibold ${
+          serverMessage.includes("Invalid") || serverMessage.includes("failed") || serverMessage.includes("required") || serverMessage.includes("least")
+            ? "bg-red-100 text-red-700"
+            : "bg-success-light text-success"
+        }`}>
           {serverMessage}
         </p>
       ) : null}

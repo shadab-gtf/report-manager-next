@@ -32,6 +32,21 @@ interface EmailTemplateData {
   overallScore?: string | number;
 }
 
+export function escapeHtml(str: string | undefined | null): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+export function escapeHtmlMultiline(str: string | undefined | null): string {
+  if (!str) return "";
+  return escapeHtml(str).replace(/\r?\n/g, "<br/>");
+}
+
 export function generateHtmlEmail(data: EmailTemplateData): string {
   // Pad tasks array to at least 12 rows to match the visual height of the image, or render what's passed
   const paddedTasks = [...data.tasks];
@@ -42,14 +57,14 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
   const tasksHtml = paddedTasks.map((task, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
-      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.description || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.category || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.priority || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.status || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.description ? escapeHtml(task.description) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.category ? escapeHtml(task.category) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.priority ? escapeHtml(task.priority) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.status ? escapeHtml(task.status) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.timeSpent !== undefined && task.timeSpent !== "" ? Number(task.timeSpent).toFixed(1) : "0.0"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.completion !== undefined && task.completion !== "" ? task.completion + "%" : "0%"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.plannedBy || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.notes || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.plannedBy ? escapeHtml(task.plannedBy) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.notes ? escapeHtml(task.notes) : "&nbsp;"}</td>
     </tr>
   `).join("");
 
@@ -61,12 +76,12 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
   const meetingsHtml = paddedMeetings.map((meeting, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
-      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.subject || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8;">${meeting.withWhom || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.time || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.subject ? escapeHtml(meeting.subject) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8;">${meeting.withWhom ? escapeHtml(meeting.withWhom) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.time ? escapeHtml(meeting.time) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 50px;">${meeting.duration !== undefined && meeting.duration !== "" ? meeting.duration : "0"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.type || "&nbsp;"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.outcome || "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${meeting.type ? escapeHtml(meeting.type) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.outcome ? escapeHtml(meeting.outcome) : "&nbsp;"}</td>
     </tr>
   `).join("");
 
@@ -98,19 +113,19 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
     <table width="100%" style="border-collapse: collapse; font-size: 11px; margin: 12px 0;">
       <tr>
         <td style="padding: 6px 8px; font-weight: bold; width: 14%; color: #333;">Employee Name</td>
-        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.employeeName}</div></td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.employeeName)}</div></td>
         <td style="padding: 6px 8px; font-weight: bold; width: 8%; color: #333;">Date</td>
-        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.reportDate}</div></td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.reportDate)}</div></td>
         <td style="padding: 6px 8px; font-weight: bold; width: 8%; color: #333;">Day</td>
-        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.day || new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date())}</div></td>
+        <td style="width: 20%; padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.day || new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date()))}</div></td>
       </tr>
       <tr>
         <td style="padding: 6px 8px; font-weight: bold; color: #333;">Department</td>
-        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.department}</div></td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.department)}</div></td>
         <td style="padding: 6px 8px; font-weight: bold; color: #333;">Designation</td>
-        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.designation}</div></td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.designation)}</div></td>
         <td style="padding: 6px 8px; font-weight: bold; color: #333;">Reporting To</td>
-        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${data.managerName}</div></td>
+        <td style="padding: 2px 4px;"><div style="border: 1px solid #23304c; background-color: #e8f4f8; padding: 4px 6px; color: #333; font-weight: bold; min-height: 14px;">${escapeHtml(data.managerName)}</div></td>
       </tr>
     </table>
 
@@ -180,7 +195,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.keyAccomplishments || "&nbsp;"}
+            ${data.keyAccomplishments ? escapeHtmlMultiline(data.keyAccomplishments) : "&nbsp;"}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
@@ -192,7 +207,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.pending || "&nbsp;"}
+            ${data.pending ? escapeHtmlMultiline(data.pending) : "&nbsp;"}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
@@ -204,7 +219,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.blockers || "&nbsp;"}
+            ${data.blockers ? escapeHtmlMultiline(data.blockers) : "&nbsp;"}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
@@ -216,7 +231,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.tomorrowPlan || "&nbsp;"}
+            ${data.tomorrowPlan ? escapeHtmlMultiline(data.tomorrowPlan) : "&nbsp;"}
           </td>
         </tr>
       </table>
@@ -252,11 +267,11 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
      <table width="100%" style="text-align: center; font-style: italic; font-size: 10px; color: #333; margin-top: 16px; padding: 16px 0;">
         <tr>
           <td width="13%" style="text-align: right; padding-right: 8px;">Employee Signature:</td>
-          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.employeeName}</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${escapeHtml(data.employeeName)}</td>
           <td width="13%" style="text-align: right; padding-right: 8px;">Date:</td>
-          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.reportDate}</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${escapeHtml(data.reportDate)}</td>
           <td width="13%" style="text-align: right; padding-right: 8px;">Manager Sign:</td>
-          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${data.managerName}</td>
+          <td width="13%" style="border-bottom: 1px solid #666; font-size:8px">${escapeHtml(data.managerName)}</td>
         </tr>
       </table>
       <div style="height: 12px;"></div>
