@@ -5,7 +5,6 @@ import {
   UsersIcon,
   ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
-  ChartBarIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { useTeamStats, useRecentSubmissions } from "../hooks/use-team-reports";
@@ -36,6 +35,7 @@ export function ManagerDashboard() {
       desc: "Direct reports assigned to you",
       icon: UsersIcon,
       color: "text-primary bg-primary-light/50",
+      href: "/manager/team",
     },
     {
       label: "Today's Reports",
@@ -43,6 +43,7 @@ export function ManagerDashboard() {
       desc: `${stats?.pendingToday || 0} pending review`,
       icon: ClipboardDocumentCheckIcon,
       color: "text-success bg-success-light",
+      href: "/manager/reports",
     },
     {
       label: "Missing Reports",
@@ -50,13 +51,7 @@ export function ManagerDashboard() {
       desc: "Required submissions missing today",
       icon: ExclamationTriangleIcon,
       color: "text-danger bg-danger-light",
-    },
-    {
-      label: "Team Compliance",
-      value: statsLoading ? "..." : `${stats?.complianceRate || 0}%`,
-      desc: "Submissions target compliance rate",
-      icon: ChartBarIcon,
-      color: "text-warning bg-warning-light",
+      href: "/manager/missing-reports",
     },
   ];
 
@@ -81,11 +76,15 @@ export function ManagerDashboard() {
       </section>
 
       {/* Metrics Grid */}
-      <section aria-label="Team metrics" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Team metrics" className="grid gap-4 md:grid-cols-3">
         {metricCards.map((card) => {
           const Icon = card.icon;
           return (
-            <article key={card.label} className="rounded-lg border border-border bg-card p-5 shadow-sm">
+            <Link
+              key={card.label}
+              href={card.href}
+              className="group rounded-lg border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:scale-[1.02]"
+            >
               <div className="flex items-center justify-between gap-4">
                 <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
                 <div className={`rounded-lg p-2 ${card.color}`}>
@@ -93,8 +92,11 @@ export function ManagerDashboard() {
                 </div>
               </div>
               <p className="mt-4 text-2xl font-semibold text-card-foreground">{card.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{card.desc}</p>
-            </article>
+              <div className="mt-1 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">{card.desc}</p>
+                <ArrowRightIcon className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+              </div>
+            </Link>
           );
         })}
       </section>
@@ -112,7 +114,7 @@ export function ManagerDashboard() {
               View all reports <ArrowRightIcon className="h-3.5 w-3.5" />
             </Link>
           </div>
-          
+
           <div className="mt-6 divide-y divide-border">
             {submissionsLoading ? (
               <div className="py-4 text-sm text-muted-foreground text-center">Loading recent submissions...</div>
@@ -125,12 +127,10 @@ export function ManagerDashboard() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      sub.status.includes("Late")
-                        ? "bg-red-50 text-red-700 border border-red-200"
-                        : sub.status === "Approved"
-                        ? "bg-green-50 text-green-700 border border-green-200"
-                        : "bg-blue-50 text-blue-700 border border-blue-200"
-                    }`}>
+                      sub.status === "Missing"
+                      ? "bg-red-50 text-red-700 border border-red-200"
+                      : "bg-green-50 text-green-700 border border-green-200"
+                      }`}>
                       {sub.status}
                     </span>
                     <Link
@@ -153,7 +153,7 @@ export function ManagerDashboard() {
           <div>
             <h2 className="text-lg font-semibold text-card-foreground">Quick Management</h2>
             <p className="text-xs text-muted-foreground mt-1">Shortcuts to operations workspace panels</p>
-            
+
             <div className="mt-6 grid gap-3">
               <Link
                 href="/manager/team"
@@ -165,7 +165,7 @@ export function ManagerDashboard() {
                 </div>
                 <ArrowRightIcon className="h-4 w-4 text-muted-foreground shrink-0" />
               </Link>
-              
+
               <Link
                 href="/manager/reports"
                 className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-left"
@@ -200,7 +200,7 @@ export function ManagerDashboard() {
               </Link>
             </div>
           </div>
-          
+
           <div className="mt-6 border-t border-border pt-4 text-center">
             <p className="text-xs text-muted-foreground">Report Manager &bull; Operations Portal</p>
           </div>

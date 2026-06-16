@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchTeamMembers, fetchTeamMember, fetchMemberReportHistory } from "../services/team-service";
 
-export function useTeam(filters?: { query?: string; statusToday?: "Submitted" | "Pending" | "All" }) {
+export function useTeam(filters?: { query?: string; statusToday?: "Submitted" | "Missing" | "All" }) {
   return useQuery({
     queryKey: ["teamMembers", filters],
     queryFn: () => fetchTeamMembers(filters),

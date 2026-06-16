@@ -237,11 +237,8 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
                     <tr key={rep.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-4 font-semibold text-foreground">{rep.reportDate}</td>
                       <td className="px-5 py-4">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${rep.isLate
-                            ? "bg-red-50 text-red-700 border border-red-200"
-                            : "bg-green-50 text-green-700 border border-green-200"
-                          }`}>
-                          {rep.isLate ? "Submitted (Late)" : "Submitted"}
+                        <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                          Submitted
                         </span>
                       </td>
                       <td className="px-5 py-4 font-medium">{rep.hoursLogged} hrs</td>

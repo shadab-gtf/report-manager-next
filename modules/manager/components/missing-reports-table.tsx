@@ -7,16 +7,77 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ExclamationCircleIcon, BellIcon } from "@heroicons/react/24/outline";
+import { ExclamationCircleIcon, EnvelopeIcon, CalendarDaysIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useMissingReports } from "../hooks/use-manager-analytics";
 import { MissingReport } from "../types/manager";
+import type { DatePreset } from "../services/manager-service";
+import Link from "next/link";
+
+const DATE_PRESETS: Array<{ key: DatePreset; label: string }> = [
+  { key: "Today", label: "Today" },
+  { key: "7Days", label: "7 Days" },
+  { key: "10Days", label: "10 Days" },
+  { key: "15Days", label: "15 Days" },
+  { key: "30Days", label: "30 Days" },
+  { key: "Custom", label: "Custom Date" },
+];
+
+interface CustomDateRangeProps {
+  startDate: string;
+  endDate: string;
+  onStartChange: (date: string) => void;
+  onEndChange: (date: string) => void;
+  onClose: () => void;
+}
+
+function CustomDateRange({
+  startDate,
+  endDate,
+  onStartChange,
+  onEndChange,
+  onClose,
+}: CustomDateRangeProps) {
+  return (
+    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-200">
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) => onStartChange(e.target.value)}
+        className="rounded border border-border bg-card px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+        aria-label="Start date"
+      />
+      <span className="text-xs text-muted-foreground">to</span>
+      <input
+        type="date"
+        value={endDate}
+        onChange={(e) => onEndChange(e.target.value)}
+        className="rounded border border-border bg-card px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+        aria-label="End date"
+      />
+      <button
+        type="button"
+        onClick={onClose}
+        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+        aria-label="Clear custom date"
+      >
+        <XMarkIcon className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 const columnHelper = createColumnHelper<MissingReport>();
 
 export function MissingReportsTable() {
-  const [filter, setFilter] = useState<"Today" | "7Days" | "30Days">("Today");
+  const [filter, setFilter] = useState<DatePreset>("Today");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
 
-  const { data: missingReports = [], isLoading } = useMissingReports(filter);
+  const customRange = filter === "Custom" && customStart && customEnd
+    ? { start: customStart, end: customEnd }
+    : undefined;
+
+  const { data: missingReports = [], isLoading } = useMissingReports(filter, customRange);
 
   const columns = useMemo(
     () => [
@@ -39,13 +100,12 @@ export function MissingReportsTable() {
           const days = info.getValue();
           return (
             <span
-              className={`rounded-md px-2.5 py-1 text-xs font-semibold ${
-                days >= 5
-                  ? "bg-red-100 text-red-800 border border-red-200"
-                  : days >= 3
+              className={`rounded-md px-2.5 py-1 text-xs font-semibold ${days >= 5
+                ? "bg-red-100 text-red-800 border border-red-200"
+                : days >= 3
                   ? "bg-orange-100 text-orange-800 border border-orange-200"
                   : "bg-yellow-100 text-yellow-800 border border-yellow-200"
-              }`}
+                }`}
             >
               {days} {days === 1 ? "day" : "days"} missed
             </span>
@@ -59,22 +119,24 @@ export function MissingReportsTable() {
       columnHelper.display({
         id: "actions",
         header: "Remind",
-        cell: () => (
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                import("sonner").then(({ toast }) => {
-                  toast.success("Reminder notification sent successfully to employee.");
-                });
-              }
-            }}
-            className="inline-flex items-center gap-1 rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-light transition-colors"
-          >
-            <BellIcon className="h-3.5 w-3.5" />
-            Nudge
-          </button>
-        ),
+        cell: (info) => {
+          const row = info.row.original;
+          const mockEmail = `${row.employeeName.toLowerCase().replace(/\s+/g, ".")}@company.com`;
+          const subject = encodeURIComponent("Action Required: Missing Daily Reports");
+          const body = encodeURIComponent(
+            `Hi ${row.employeeName},\n\nJust a gentle reminder to submit your daily reports. Our records show you have missed ${row.daysMissed} day(s).\n\nPlease update them as soon as possible.\n\nThanks!`
+          );
+
+          return (
+            <Link
+              href={`mailto:${mockEmail}?subject=${subject}&body=${body}`}
+              className="inline-flex items-center gap-1 rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-light transition-colors"
+            >
+              <EnvelopeIcon className="h-3.5 w-3.5" />
+              Nudge
+            </Link>
+          );
+        },
       }),
     ],
     []
@@ -102,20 +164,34 @@ export function MissingReportsTable() {
       </div>
 
       {/* Filter range selector */}
-      <div className="flex rounded-md border border-border bg-card p-1 shadow-sm w-fit">
-        {(["Today", "7Days", "30Days"] as const).map((range) => (
+      <div className="flex flex-wrap items-center gap-2">
+        {DATE_PRESETS.map((preset) => (
           <button
-            key={range}
-            onClick={() => setFilter(range)}
-            className={`rounded px-4 py-2 text-xs font-semibold transition-colors ${
-              filter === range
-                ? "bg-primary text-white shadow-sm"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
+            key={preset.key}
+            type="button"
+            onClick={() => setFilter(preset.key)}
+            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${filter === preset.key
+              ? "bg-primary text-white shadow-sm"
+              : "border border-border bg-card text-foreground hover:border-primary/30 hover:bg-primary/5"
+              }`}
+            aria-pressed={filter === preset.key}
           >
-            {range === "Today" ? "Missing Today" : range === "7Days" ? "Last 7 Days" : "Last 30 Days"}
+            {preset.key === "Custom" && (
+              <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
+            )}
+            {preset.label}
           </button>
         ))}
+
+        {filter === "Custom" && (
+          <CustomDateRange
+            startDate={customStart}
+            endDate={customEnd}
+            onStartChange={setCustomStart}
+            onEndChange={setCustomEnd}
+            onClose={() => setFilter("Today")}
+          />
+        )}
       </div>
 
       {/* Missing reports table */}

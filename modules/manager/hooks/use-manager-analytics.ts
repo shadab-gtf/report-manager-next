@@ -27,9 +27,14 @@ export function useMostConsistent() {
   });
 }
 
-export function useMissingReports(filter: "Today" | "7Days" | "30Days") {
+import type { DatePreset } from "../services/manager-service";
+
+export function useMissingReports(
+  filter: DatePreset,
+  customRange?: { start: string; end: string }
+) {
   return useQuery({
-    queryKey: ["missingReports", filter],
-    queryFn: () => fetchMissingReports(filter),
+    queryKey: ["missingReports", filter, customRange],
+    queryFn: () => fetchMissingReports(filter, customRange),
   });
 }

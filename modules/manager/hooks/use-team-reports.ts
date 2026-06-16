@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllTeamReports, getReportById, fetchTeamStats, fetchRecentSubmissions } from "../services/manager-service";
+import {
+  fetchAllTeamReports,
+  getReportById,
+  fetchTeamStats,
+  fetchRecentSubmissions,
+  fetchFilteredTeamReports,
+  getUniqueEmployees,
+} from "../services/manager-service";
+import type { TeamReportFilters } from "../services/manager-service";
 import { ReviewStatus } from "../types/manager";
 
 export function useTeamReports(filters?: {
@@ -9,6 +17,20 @@ export function useTeamReports(filters?: {
   return useQuery({
     queryKey: ["teamReports", filters],
     queryFn: () => fetchAllTeamReports(filters),
+  });
+}
+
+export function useFilteredTeamReports(filters?: TeamReportFilters) {
+  return useQuery({
+    queryKey: ["filteredTeamReports", filters],
+    queryFn: () => fetchFilteredTeamReports(filters),
+  });
+}
+
+export function useUniqueEmployees() {
+  return useQuery({
+    queryKey: ["uniqueEmployees"],
+    queryFn: () => getUniqueEmployees(),
   });
 }
 

@@ -14,11 +14,14 @@ import {
   XMarkIcon,
   UsersIcon,
   ExclamationCircleIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { InstallPrompt } from "@/components/ui/install-prompt";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -78,7 +81,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
       <OfflineBanner />
       <div className="flex min-h-screen">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-200 lg:block ${collapsed ? "w-20" : "w-72"
+          className={`fixed inset-y-0 left-0 z-40 hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-300 ease-in-out lg:block ${collapsed ? "w-20" : "w-72"
             }`}
         >
           <SidebarContent
@@ -116,7 +119,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
         ) : null}
 
         <div
-          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-200 ${collapsed ? "lg:pl-20" : "lg:pl-72"
+          className={`flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-in-out ${collapsed ? "lg:pl-20" : "lg:pl-72"
             }`}
         >
           <header className="sticky top-0 z-30 border-b border-border bg-white px-4 py-3 md:px-6 lg:px-8">
@@ -194,26 +197,34 @@ function SidebarContent({
               className="h-auto w-auto"
             />
           </span>
-          {!collapsed ? (
-            <span className="min-w-0">
-              <span className="block truncate text-lg font-medium text-sidebar-foreground">
-                Report Manager
-              </span>
-            </span>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.span
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: "auto", opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="min-w-0 overflow-hidden whitespace-nowrap"
+              >
+                <span className="block truncate text-lg font-medium text-sidebar-foreground">
+                  Report Manager
+                </span>
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Link>
         <button
           type="button"
           title={mobileClose ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
           onClick={onToggle}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-sidebar-muted hover:bg-muted hover:text-foreground"
+          className="inline-flex absolute right-[-10px] h-7 w-7 bg-primary-light border border-primary rounded-full  cursor-pointer items-center justify-center  text-primary hover:bg-primary-light hover:text-primary"
         >
           {mobileClose ? (
             <XMarkIcon className="h-5 w-5" />
           ) : collapsed ? (
-            <ChevronDoubleRightIcon className="h-5 w-5" />
+            <ChevronRightIcon className="h-4 w-4" />
           ) : (
-            <ChevronDoubleLeftIcon className="h-5 w-5" />
+            <ChevronLeftIcon className="h-5 w-5" />
           )}
         </button>
       </div>
@@ -235,7 +246,19 @@ function SidebarContent({
               }
             >
               <Icon className="h-5 w-5 shrink-0" />
-              {!collapsed ? <span>{item.label}</span> : null}
+              <AnimatePresence initial={false}>
+                {!collapsed && (
+                  <motion.span
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: "auto", opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden whitespace-nowrap"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           );
         })}
@@ -250,7 +273,19 @@ function SidebarContent({
           title={collapsed ? "Logout" : undefined}
         >
           <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
-          {!collapsed ? <span>Logout</span> : null}
+          <AnimatePresence initial={false}>
+            {!collapsed && (
+              <motion.span
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: "auto", opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden whitespace-nowrap"
+              >
+                Logout
+              </motion.span>
+            )}
+          </AnimatePresence>
         </button>
       </div>
     </div>

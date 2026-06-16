@@ -16,7 +16,7 @@ const columnHelper = createColumnHelper<TeamMember>();
 
 export function TeamTable() {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Submitted" | "Pending">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "Submitted" | "Missing">("All");
 
   const { data: team = [], isLoading } = useTeam({
     query,
@@ -75,8 +75,6 @@ export function TeamTable() {
               className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 status === "Submitted"
                   ? "bg-green-50 text-green-700 border border-green-200"
-                  : status === "Pending"
-                  ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
                   : "bg-red-50 text-red-700 border border-red-200"
               }`}
             >
@@ -129,7 +127,7 @@ export function TeamTable() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Filter Tabs */}
         <div className="flex rounded-md border border-border bg-card p-1 shadow-sm">
-          {(["All", "Submitted", "Pending"] as const).map((tab) => (
+          {(["All", "Submitted", "Missing"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setStatusFilter(tab)}
@@ -139,7 +137,7 @@ export function TeamTable() {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
-              {tab === "All" ? "All Employees" : tab === "Submitted" ? "Submitted Today" : "Pending Today"}
+              {tab === "All" ? "All Employees" : tab === "Submitted" ? "Submitted Today" : "Missing Today"}
             </button>
           ))}
         </div>

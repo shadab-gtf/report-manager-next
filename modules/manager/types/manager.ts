@@ -8,7 +8,7 @@ export interface TeamMember {
   designation: string;
   joiningDate: string;
   reportingManager: string;
-  statusToday: "Submitted" | "Pending" | "Missing";
+  statusToday: "Submitted" | "Missing";
   complianceRate: number;
   totalReports: number;
   submittedOnTime: number;

@@ -271,7 +271,7 @@ export async function fetchRecentSubmissions(): Promise<Array<{ id: string; empl
       employeeName: r.employeeName,
       employeeId: r.employeeId,
       time: `${r.reportDate === new Date().toISOString().split("T")[0] ? "Today" : "Yesterday"}, ${r.submittedAt.replace("Yesterday, ", "")}`,
-      status: r.isLate ? "Submitted (Late)" : r.status,
+      status: "Submitted",
     }))
     .slice(0, 5);
 }
@@ -282,7 +282,7 @@ export async function fetchAllTeamReports(filters?: {
 }): Promise<TeamReport[]> {
   const allReports = getStoredReports();
   const reports = allReports.filter((r) => r.status === "Submitted" || r.status === "Approved");
-  
+
   if (!filters) return reports;
 
   return reports.filter((r) => {
@@ -309,7 +309,7 @@ export async function updateReportReview(
 
   const report = reports[index];
   report.reviewStatus = reviewStatus;
-  
+
   if (reviewStatus === "reviewed") {
     report.status = "Approved";
   } else {
@@ -336,4 +336,109 @@ export async function getReportById(reportId: string): Promise<TeamReport | null
   const allReports = getStoredReports();
   const reports = allReports.filter((r) => r.status === "Submitted" || r.status === "Approved");
   return reports.find((r) => r.id === reportId) || null;
+}
+
+export type DatePreset = "Today" | "7Days" | "10Days" | "15Days" | "30Days" | "Custom";
+
+export interface TeamReportFilters {
+  employeeId?: string;
+  datePreset?: DatePreset;
+  customRange?: { start: string; end: string };
+}
+
+export async function getUniqueEmployees(): Promise<
+  Array<{ employeeId: string; employeeName: string }>
+> {
+  const allReports = getStoredReports();
+  const reports = allReports.filter(
+    (r) => r.status === "Submitted" || r.status === "Approved"
+  );
+
+  const seen = new Map<string, string>();
+  for (const r of reports) {
+    if (!seen.has(r.employeeId)) {
+      seen.set(r.employeeId, r.employeeName);
+    }
+  }
+
+  return Array.from(seen.entries()).map(([employeeId, employeeName]) => ({
+    employeeId,
+    employeeName,
+  }));
+}
+
+/**
+ * Fetches team reports with combined employee + date range filtering.
+ * Time Complexity: O(n) where n = total stored reports.
+ */
+export async function fetchFilteredTeamReports(
+  filters?: TeamReportFilters
+): Promise<TeamReport[]> {
+  const allReports = getStoredReports();
+  let reports = allReports.filter(
+    (r) => r.status === "Submitted" || r.status === "Approved"
+  );
+
+  if (!filters) return reports;
+
+  // Filter by employee
+  if (filters.employeeId) {
+    reports = reports.filter((r) => r.employeeId === filters.employeeId);
+  }
+
+  // Filter by date
+  if (filters.datePreset && filters.datePreset !== "Custom") {
+    const now = Date.now();
+    let limitDays = 0;
+
+    switch (filters.datePreset) {
+      case "Today":
+        limitDays = 0;
+        break;
+      case "7Days":
+        limitDays = 7;
+        break;
+      case "10Days":
+        limitDays = 10;
+        break;
+      case "15Days":
+        limitDays = 15;
+        break;
+      case "30Days":
+        limitDays = 30;
+        break;
+    }
+
+    if (filters.datePreset === "Today") {
+      const todayStr = new Date().toISOString().split("T")[0];
+      reports = reports.filter((r) => r.reportDate === todayStr);
+    } else {
+      reports = reports.filter((r) => {
+        const reportTime = new Date(r.reportDate).getTime();
+        const diffDays = (now - reportTime) / (1000 * 3600 * 24);
+        return diffDays <= limitDays;
+      });
+    }
+  } else if (filters.datePreset === "Custom" && filters.customRange) {
+    const start = filters.customRange.start
+      ? new Date(filters.customRange.start).getTime()
+      : 0;
+    const end = filters.customRange.end
+      ? new Date(filters.customRange.end + "T23:59:59").getTime()
+      : Infinity;
+
+    reports = reports.filter((r) => {
+      const reportTime = new Date(r.reportDate).getTime();
+      return reportTime >= start && reportTime <= end;
+    });
+  }
+
+  // Sort by reportDate descending, then by submittedAt
+  reports.sort((a, b) => {
+    const dateCompare = b.reportDate.localeCompare(a.reportDate);
+    if (dateCompare !== 0) return dateCompare;
+    return b.submittedAt.localeCompare(a.submittedAt);
+  });
+
+  return reports;
 }

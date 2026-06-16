@@ -8,7 +8,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import { reportDb } from "@/modules/reports/services/report-db";
-import { useNotificationStore } from "@/modules/notifications/store/notification-store";
 import type { DailyReportDraft, MeetingLogItem, TaskLogItem } from "@/types/report";
 import { createId } from "@/lib/utils/format";
 import { getLocalDateString } from "@/modules/reports/services/report-repository";
@@ -72,7 +71,6 @@ function getServerOnlineSnapshot(): boolean {
 }
 
 export function useReportDraft() {
-  const addNotification = useNotificationStore((state) => state.addNotification);
   const [draft, setDraft] = useState<DailyReportDraft>(() => createEmptyDraft());
   const [isLoaded, setIsLoaded] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
@@ -238,14 +236,8 @@ export function useReportDraft() {
 
     setDraft(updatedCurrentDraft);
     setLastSavedAt(updatedCurrentDraft.updatedAt);
-    addNotification({
-      title: isOnline ? "Report submitted" : "Report queued",
-      message: isOnline
-        ? "Your daily report was submitted successfully."
-        : "Your report is saved locally and will sync when online.",
-      tone: isOnline ? "success" : "warning",
-    });
-  }, [addNotification, draft, isOnline]);
+
+  }, [draft, isOnline]);
 
   const totalHours = useMemo(
     () => draft.tasks.reduce((total, task) => total + Number(task.timeSpent || 0), 0),

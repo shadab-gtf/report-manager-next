@@ -1,7 +1,7 @@
 import { TeamMember, TeamReport } from "../types/manager";
 import { fetchAllTeamReports } from "./manager-service";
 
-const MOCK_TEAM_KEY = "rm_manager_team";
+const MOCK_TEAM_KEY = "rm_manager_team_v2";
 
 const initialTeam: TeamMember[] = [
   {
@@ -27,7 +27,7 @@ const initialTeam: TeamMember[] = [
     designation: "Support Specialist",
     joiningDate: "2024-08-10",
     reportingManager: "Saurabh Yadav",
-    statusToday: "Pending",
+    statusToday: "Missing",
     complianceRate: 60,
     totalReports: 50,
     submittedOnTime: 25,
@@ -72,7 +72,7 @@ const initialTeam: TeamMember[] = [
     designation: "Software Engineer",
     joiningDate: "2024-01-20",
     reportingManager: "Saurabh Yadav",
-    statusToday: "Pending",
+    statusToday: "Missing",
     complianceRate: 92,
     totalReports: 82,
     submittedOnTime: 70,
@@ -138,7 +138,7 @@ function getStoredTeam(): TeamMember[] {
 
 export async function fetchTeamMembers(filters?: {
   query?: string;
-  statusToday?: "Submitted" | "Pending" | "All";
+  statusToday?: "Submitted" | "Missing" | "All";
 }): Promise<TeamMember[]> {
   let members = getStoredTeam();
   

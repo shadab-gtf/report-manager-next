@@ -53,7 +53,12 @@ export async function fetchMostConsistent(): Promise<Array<{ employeeName: strin
     .sort((a, b) => b.complianceRate - a.complianceRate);
 }
 
-export async function fetchMissingReports(filter: "Today" | "7Days" | "30Days"): Promise<MissingReport[]> {
+import type { DatePreset } from "./manager-service";
+
+export async function fetchMissingReports(
+  filter: DatePreset,
+  customRange?: { start: string; end: string }
+): Promise<MissingReport[]> {
   const members = await fetchTeamMembers();
   
   if (filter === "Today") {
@@ -68,15 +73,23 @@ export async function fetchMissingReports(filter: "Today" | "7Days" | "30Days"):
       }));
   }
 
-  // 7 days and 30 days filters
+  // Handle other filters
   return members
     .filter((m) => m.missedReports > 0)
-    .map((m) => ({
-      employeeId: m.employeeId,
-      employeeName: m.name,
-      department: m.department,
-      daysMissed: filter === "7Days" ? Math.min(m.missedReports, 3) : m.missedReports,
-      lastSubmission: m.employeeId === "GTF-1844" ? "Yesterday, 6:30 PM" : "3 days ago",
-    }))
+    .map((m) => {
+      let daysMissed = m.missedReports;
+      if (filter === "7Days") daysMissed = Math.min(m.missedReports, 3);
+      else if (filter === "10Days") daysMissed = Math.min(m.missedReports, 4);
+      else if (filter === "15Days") daysMissed = Math.min(m.missedReports, 5);
+      // else it keeps m.missedReports for 30Days or Custom
+
+      return {
+        employeeId: m.employeeId,
+        employeeName: m.name,
+        department: m.department,
+        daysMissed,
+        lastSubmission: m.employeeId === "GTF-1844" ? "Yesterday, 6:30 PM" : "3 days ago",
+      };
+    })
     .sort((a, b) => b.daysMissed - a.daysMissed);
 }

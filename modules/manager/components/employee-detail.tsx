@@ -85,12 +85,21 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
             <p className="text-xs text-muted-foreground mt-0.5">Overall submission efficiency</p>
           </div>
 
-          <div className="relative my-6 flex h-36 w-36 items-center justify-center rounded-full border-8 border-muted">
-            <div className="text-center">
+          <div className="relative my-6 flex h-40 w-40 items-center justify-center">
+            <div className="text-center relative z-10">
               <span className="text-3xl font-bold text-primary">{member.complianceRate}%</span>
               <p className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground mt-0.5">Compliance</p>
             </div>
-            <svg className="absolute -inset-2 h-40 w-40 -rotate-90">
+            <svg className="absolute inset-0 h-40 w-40 -rotate-90">
+              <circle
+                cx="80"
+                cy="80"
+                r="72"
+                fill="transparent"
+                stroke="currentColor"
+                strokeWidth="8"
+                className="text-muted"
+              />
               <circle
                 cx="80"
                 cy="80"
@@ -148,7 +157,7 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                   <th className="px-5 py-3">Date</th>
                   <th className="px-5 py-3">Hours Logged</th>
                   <th className="px-5 py-3">Completion</th>
-                  <th className="px-5 py-3">Review Status</th>
+                  <th className="px-5 py-3">Submission Status</th>
                   <th className="px-5 py-3">Actions</th>
                 </tr>
               </thead>
@@ -159,40 +168,62 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                       Loading history...
                     </td>
                   </tr>
-                ) : history.length > 0 ? (
-                  history.slice(0, 5).map((rep) => (
-                    <tr key={rep.id} className="hover:bg-muted/30">
-                      <td className="px-5 py-3.5 font-medium">{rep.reportDate}</td>
-                      <td className="px-5 py-3.5">{rep.hoursLogged} hrs</td>
-                      <td className="px-5 py-3.5">{rep.completion}%</td>
-                      <td className="px-5 py-3.5">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                          rep.reviewStatus === "reviewed"
-                            ? "bg-green-50 text-green-700 border border-green-200"
-                            : rep.reviewStatus === "follow_up"
-                            ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                            : "bg-blue-50 text-blue-700 border border-blue-200"
-                        }`}>
-                          {rep.reviewStatus === "reviewed" ? "Reviewed" : rep.reviewStatus === "follow_up" ? "Follow Up" : "Pending"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <Link
-                          href={`/manager/reports?open=${rep.id}`}
-                          className="text-xs font-semibold text-primary hover:underline"
-                        >
-                          View Report
-                        </Link>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-5 py-4 text-center text-xs text-muted-foreground">
-                      No reports found for the last 7 days.
-                    </td>
-                  </tr>
-                )}
+                ) : (() => {
+                    const dates: string[] = [];
+                    const now = new Date();
+                    for (let i = 0; i < 7; i++) {
+                      const temp = new Date(now);
+                      temp.setDate(temp.getDate() - i);
+                      const day = temp.getDay();
+                      if (day !== 0 && day !== 6) { // Weekdays only
+                        const y = temp.getFullYear();
+                        const m = String(temp.getMonth() + 1).padStart(2, "0");
+                        const d = String(temp.getDate()).padStart(2, "0");
+                        dates.push(`${y}-${m}-${d}`);
+                      }
+                    }
+                    const recentDates = dates.slice(0, 5);
+
+                    return recentDates.length > 0 ? (
+                      recentDates.map((date) => {
+                        const rep = history.find((r) => r.reportDate === date);
+                        return (
+                          <tr key={date} className="hover:bg-muted/30">
+                            <td className="px-5 py-3.5 font-medium">{date}</td>
+                            <td className="px-5 py-3.5">{rep ? `${rep.hoursLogged} hrs` : "-"}</td>
+                            <td className="px-5 py-3.5">{rep ? `${rep.completion}%` : "-"}</td>
+                            <td className="px-5 py-3.5">
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                !rep
+                                  ? "bg-red-50 text-red-700 border border-red-200"
+                                  : "bg-green-50 text-green-700 border border-green-200"
+                              }`}>
+                                {!rep ? "Missing" : "Submitted"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-3.5">
+                              {rep ? (
+                                <Link
+                                  href={`/manager/reports?open=${rep.id}`}
+                                  className="text-xs font-semibold text-primary hover:underline"
+                                >
+                                  View Report
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-4 text-center text-xs text-muted-foreground">
+                          No recent dates available.
+                        </td>
+                      </tr>
+                    );
+                })()}
               </tbody>
             </table>
           </div>
