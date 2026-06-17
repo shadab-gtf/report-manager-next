@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ArrowLeftIcon, BellAlertIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 import { useTeamMember, useMemberReportHistory } from "../hooks/use-team";
 import { toast } from "sonner";
+import { PageTransition } from "@/components/motion/page-transition";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
+import { FadeIn } from "@/components/motion/fade-in";
 
 interface EmployeeHistoryProps {
   employeeId: string;
@@ -121,7 +124,7 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
   };
 
   return (
-    <div className="grid gap-6">
+    <PageTransition className="grid gap-6">
       {/* Back Link */}
       <div className="flex items-center gap-3">
         <Link
@@ -190,25 +193,20 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
       </div>
 
       {/* Tabs Selector */}
-      <div className="flex border-b border-border bg-card rounded-t-lg px-4 pt-2 shadow-sm -mb-6">
-        <button
-          onClick={() => setActiveTab("submitted")}
-          className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === "submitted"
-              ? "border-primary text-primary font-bold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-        >
-          Submitted Reports ({historyLoading ? "..." : history.length})
-        </button>
-        <button
-          onClick={() => setActiveTab("missed")}
-          className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === "missed"
-              ? "border-primary text-primary font-bold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-        >
-          Missed Days ({historyLoading ? "..." : missedDates.length})
-        </button>
+      <div className="w-full -mb-6 relative z-10">
+        <AnimatedTabs
+          tabs={[
+            { id: "submitted", label: `Submitted Reports (${historyLoading ? "..." : history.length})` },
+            { id: "missed", label: `Missed Days (${historyLoading ? "..." : missedDates.length})` },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(tab) => setActiveTab(tab as any)}
+          layoutId="history-tabs"
+          className="flex border-b border-border bg-card rounded-t-lg px-4 pt-2 shadow-sm"
+          tabClassName="px-4 py-2.5 text-xs font-semibold transition-all cursor-pointer relative"
+          activeTabClassName="text-primary font-bold"
+          indicatorClassName="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-none shadow-none"
+        />
       </div>
 
       {/* History Table */}
@@ -322,6 +320,6 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
           )}
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }

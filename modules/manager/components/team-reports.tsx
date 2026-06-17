@@ -28,6 +28,8 @@ import {
 } from "../hooks/use-team-reports";
 import type { DatePreset } from "../services/manager-service";
 import { generateHtmlEmail } from "@/modules/reports/utils/email-template";
+import { PageTransition } from "@/components/motion/page-transition";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
 
 const PAGE_SIZE = 20;
 
@@ -484,7 +486,7 @@ function TeamReportsContent() {
     : "";
 
   return (
-    <div className="grid gap-6" suppressHydrationWarning>
+    <PageTransition className="grid gap-6" suppressHydrationWarning>
       {/* ── Header + Date Filter Row ── */}
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -501,23 +503,26 @@ function TeamReportsContent() {
 
         {/* Date filter pills */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          {DATE_PRESETS.map((preset) => (
-            <button
-              key={preset.key}
-              type="button"
-              onClick={() => setDatePreset(preset.key)}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${datePreset === preset.key
-                  ? "bg-primary text-white shadow-sm"
-                  : "border border-border bg-card text-foreground hover:border-primary/30 hover:bg-primary/5"
-                }`}
-              aria-pressed={datePreset === preset.key}
-            >
-              {preset.key === "Custom" && (
-                <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
-              )}
-              {preset.label}
-            </button>
-          ))}
+          <AnimatedTabs
+            tabs={DATE_PRESETS.map((preset) => ({
+              id: preset.key,
+              label: (
+                <>
+                  {preset.key === "Custom" && (
+                    <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
+                  )}
+                  {preset.label}
+                </>
+              ),
+            }))}
+            activeTab={datePreset}
+            onTabChange={(tab) => setDatePreset(tab as DatePreset)}
+            layoutId="team-reports-date-filter"
+            className="flex flex-wrap items-center gap-2"
+            tabClassName="relative rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-border bg-card hover:border-primary/30 focus:outline-none"
+            activeTabClassName="text-white border-transparent bg-transparent"
+            indicatorClassName="absolute inset-0 rounded-full bg-primary shadow-sm"
+          />
 
           {/* Custom Date Range Inputs */}
           {datePreset === "Custom" && (
@@ -689,6 +694,6 @@ function TeamReportsContent() {
           )}
         </section>
       </div>
-    </div>
+    </PageTransition>
   );
 }

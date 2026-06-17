@@ -16,6 +16,11 @@ function getGreeting() {
   return "Good evening";
 }
 
+import { PageTransition } from "@/components/motion/page-transition";
+import { HoverCard } from "@/components/motion/hover-card";
+import { StaggerContainer } from "@/components/motion/stagger-container";
+import { StaggerItem } from "@/components/motion/stagger-item";
+
 export function ManagerDashboard() {
   const greeting = getGreeting();
   const { data: stats, isLoading: statsLoading } = useTeamStats();
@@ -56,7 +61,7 @@ export function ManagerDashboard() {
   ];
 
   return (
-    <div className="grid gap-6">
+    <PageTransition className="grid gap-6">
       {/* Hero Welcome */}
       <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
@@ -76,30 +81,33 @@ export function ManagerDashboard() {
       </section>
 
       {/* Metrics Grid */}
-      <section aria-label="Team metrics" className="grid gap-4 md:grid-cols-3">
+      <StaggerContainer aria-label="Team metrics" className="grid gap-4 md:grid-cols-3">
         {metricCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link
-              key={card.label}
-              href={card.href}
-              className="group rounded-lg border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:scale-[1.02]"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
-                <div className={`rounded-lg p-2 ${card.color}`}>
-                  <Icon className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="mt-4 text-2xl font-semibold text-card-foreground">{card.value}</p>
-              <div className="mt-1 flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">{card.desc}</p>
-                <ArrowRightIcon className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-              </div>
-            </Link>
+            <StaggerItem key={card.label}>
+              <HoverCard>
+                <Link
+                  href={card.href}
+                  className="block group rounded-lg border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary/30"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                    <div className={`rounded-lg p-2 ${card.color}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+                  <p className="mt-4 text-2xl font-semibold text-card-foreground">{card.value}</p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">{card.desc}</p>
+                    <ArrowRightIcon className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                  </div>
+                </Link>
+              </HoverCard>
+            </StaggerItem>
           );
         })}
-      </section>
+      </StaggerContainer>
 
       {/* Double Column Layout */}
       <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
@@ -206,6 +214,6 @@ export function ManagerDashboard() {
           </div>
         </section>
       </div>
-    </div>
+    </PageTransition>
   );
 }

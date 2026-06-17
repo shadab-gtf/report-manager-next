@@ -12,6 +12,8 @@ import { useMissingReports } from "../hooks/use-manager-analytics";
 import { MissingReport } from "../types/manager";
 import type { DatePreset } from "../services/manager-service";
 import Link from "next/link";
+import { PageTransition } from "@/components/motion/page-transition";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
 
 const DATE_PRESETS: Array<{ key: DatePreset; label: string }> = [
   { key: "Today", label: "Today" },
@@ -149,7 +151,7 @@ export function MissingReportsTable() {
   });
 
   return (
-    <section className="grid gap-6">
+    <PageTransition className="grid gap-6">
       {/* Title block */}
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm flex items-start gap-4">
         <div className="rounded-full bg-danger-light p-3 text-danger shrink-0">
@@ -165,23 +167,26 @@ export function MissingReportsTable() {
 
       {/* Filter range selector */}
       <div className="flex flex-wrap items-center gap-2">
-        {DATE_PRESETS.map((preset) => (
-          <button
-            key={preset.key}
-            type="button"
-            onClick={() => setFilter(preset.key)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer ${filter === preset.key
-              ? "bg-primary text-white shadow-sm"
-              : "border border-border bg-card text-foreground hover:border-primary/30 hover:bg-primary/5"
-              }`}
-            aria-pressed={filter === preset.key}
-          >
-            {preset.key === "Custom" && (
-              <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
-            )}
-            {preset.label}
-          </button>
-        ))}
+        <AnimatedTabs
+          tabs={DATE_PRESETS.map((preset) => ({
+            id: preset.key,
+            label: (
+              <>
+                {preset.key === "Custom" && (
+                  <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
+                )}
+                {preset.label}
+              </>
+            ),
+          }))}
+          activeTab={filter}
+          onTabChange={(tab) => setFilter(tab as DatePreset)}
+          layoutId="missing-reports-date-filter"
+          className="flex flex-wrap items-center gap-2"
+          tabClassName="relative rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-border bg-card hover:border-primary/30 focus:outline-none"
+          activeTabClassName="text-white border-transparent bg-transparent"
+          indicatorClassName="absolute inset-0 rounded-full bg-primary shadow-sm"
+        />
 
         {filter === "Custom" && (
           <CustomDateRange
@@ -239,6 +244,6 @@ export function MissingReportsTable() {
           </table>
         </div>
       </div>
-    </section>
+    </PageTransition>
   );
 }

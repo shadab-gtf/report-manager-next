@@ -11,6 +11,8 @@ import {
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useTeam } from "../hooks/use-team";
 import { TeamMember } from "../types/manager";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
+import { PageTransition } from "@/components/motion/page-transition";
 
 const columnHelper = createColumnHelper<TeamMember>();
 
@@ -114,7 +116,7 @@ export function TeamTable() {
   });
 
   return (
-    <section className="grid gap-6">
+    <PageTransition className="grid gap-6">
       {/* Header Info */}
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-card-foreground">My Team Directory</h1>
@@ -126,20 +128,13 @@ export function TeamTable() {
       {/* Filters & Search Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Filter Tabs */}
-        <div className="flex rounded-md border border-border bg-card p-1 shadow-sm">
-          {(["All", "Submitted", "Missing"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setStatusFilter(tab)}
-              className={`rounded px-3 py-1.5 text-xs font-semibold transition-colors ${
-                statusFilter === tab
-                  ? "bg-primary text-white shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {tab === "All" ? "All Employees" : tab === "Submitted" ? "Submitted Today" : "Missing Today"}
-            </button>
-          ))}
+        <div className="w-full max-w-[400px]">
+          <AnimatedTabs
+            tabs={["All", "Submitted", "Missing"]}
+            activeTab={statusFilter}
+            onTabChange={(tab) => setStatusFilter(tab as "All" | "Submitted" | "Missing")}
+            layoutId="team-table-tabs"
+          />
         </div>
 
         {/* Search Input */}
@@ -200,6 +195,6 @@ export function TeamTable() {
           </table>
         </div>
       </div>
-    </section>
+    </PageTransition>
   );
 }
