@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 import { loginWithMockApi } from "@/modules/auth/services/auth-service";
 import { persistSession } from "@/modules/auth/services/session-client";
 import {
@@ -19,6 +20,7 @@ export function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [serverMessage, setServerMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const isDev = process.env.NODE_ENV === "development";
   const {
     register,
@@ -66,13 +68,13 @@ export function LoginForm() {
           <p className="mb-2 font-semibold text-primary">Demo Credentials:</p>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <span className="font-medium text-foreground">Manager</span><br/>
-              ID: <span className="font-mono text-foreground">MGR-1001</span><br/>
+              <span className="font-medium text-foreground">Manager</span><br />
+              ID: <span className="font-mono text-foreground">MGR-1001</span><br />
               Pass: <span className="font-mono text-foreground">password123</span>
             </div>
             <div>
-              <span className="font-medium text-foreground">Employee</span><br/>
-              ID: <span className="font-mono text-foreground">GTF-1042</span><br/>
+              <span className="font-medium text-foreground">Employee</span><br />
+              ID: <span className="font-mono text-foreground">GTF-1042</span><br />
               Pass: <span className="font-mono text-foreground">password123</span>
             </div>
           </div>
@@ -96,12 +98,26 @@ export function LoginForm() {
         <label className="text-sm font-semibold text-foreground" htmlFor="password">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          className="mt-2 h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
-          {...register("password")}
-        />
+        <div className="relative mt-2">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            className="h-11 w-full rounded-md border border-input bg-background px-3 pr-10 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+            {...register("password")}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
+          </button>
+        </div>
         {errors.password ? (
           <p className="mt-1 text-sm text-danger">{errors.password.message}</p>
         ) : null}
@@ -116,11 +132,10 @@ export function LoginForm() {
         </Link>
       </div>
       {serverMessage ? (
-        <p className={`rounded-md px-3 py-2 text-sm font-semibold ${
-          serverMessage.includes("Invalid") || serverMessage.includes("failed") || serverMessage.includes("required") || serverMessage.includes("least")
-            ? "bg-red-100 text-red-700"
-            : "bg-success-light text-success"
-        }`}>
+        <p className={`rounded-md px-3 py-2 text-sm font-semibold ${serverMessage.includes("Invalid") || serverMessage.includes("failed") || serverMessage.includes("required") || serverMessage.includes("least")
+          ? "bg-red-100 text-red-700"
+          : "bg-success-light text-success"
+          }`}>
           {serverMessage}
         </p>
       ) : null}
@@ -133,7 +148,7 @@ export function LoginForm() {
       </button>
 
       <BiometricLoginButton />
-      
+
       <div className="mt-4 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link href="/signup" className="font-semibold text-primary hover:underline">

@@ -9,7 +9,7 @@ import { MeetingsStep } from "./report-builder/meetings-step";
 import { EodNotesStep } from "./report-builder/eod-notes-step";
 import { PreviewAndSubmitStep } from "./report-builder/preview-and-submit-step";
 import type { EndOfDayNotes } from "@/types/report";
-import { useNotificationStore } from "@/modules/notifications/store/notification-store";
+import { toast } from "sonner";
 import { EnvelopeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 const steps = ["Task Log", "Meetings & Calls", "EOD Notes", "Preview"];
@@ -17,7 +17,6 @@ const steps = ["Task Log", "Meetings & Calls", "EOD Notes", "Preview"];
 export function ReportBuilder() {
   const [step, setStep] = useState(0);
   const session = useAppSelector((state) => state.auth.session);
-  const addNotification = useNotificationStore((state) => state.addNotification);
   const {
     draft,
     setDraft,
@@ -72,17 +71,13 @@ export function ReportBuilder() {
           throw new Error("Failed to send");
         }
 
-        addNotification({
-          title: "Report Submitted Successfully",
-          message: `Your report has been logged and sent to ${managerName}.`,
-          tone: "success",
+        toast.success("Report Submitted Successfully", {
+          description: `Your report has been logged and sent to ${managerName}.`,
         });
         await submitReport();
       } catch (error) {
-        addNotification({
-          title: "Submission Failed",
-          message: "Failed to send the HTML email template. Please try again.",
-          tone: "danger",
+        toast.error("Submission Failed", {
+          description: "Failed to send the HTML email template. Please try again.",
         });
       } finally {
         setIsEmailing(false);
@@ -90,16 +85,12 @@ export function ReportBuilder() {
     } else {
       try {
         await submitReport();
-        addNotification({
-          title: "Report Saved Offline",
-          message: "Your report has been queued and will sync when online.",
-          tone: "warning",
+        toast.warning("Report Saved Offline", {
+          description: "Your report has been queued and will sync when online.",
         });
       } catch (error) {
-        addNotification({
-          title: "Offline Save Failed",
-          message: "Failed to queue the report offline. Please try again.",
-          tone: "danger",
+        toast.error("Offline Save Failed", {
+          description: "Failed to queue the report offline. Please try again.",
         });
       } finally {
         setIsEmailing(false);

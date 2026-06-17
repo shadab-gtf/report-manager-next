@@ -53,8 +53,8 @@ export const mockEmployees: Record<string, EmployeeProfile> = {
 export function getEmployeeProfile(identifier: string): EmployeeProfile {
   const cleanId = identifier.includes("@")
     ? (identifier.toLowerCase().includes("saurabh.yadav") || identifier.toLowerCase().includes("manager")
-        ? "MGR-1001"
-        : (identifier.toLowerCase().includes("kuldeep.choudhary") ? "GTF-1042" : "GTF-1005"))
+      ? "MGR-1001"
+      : (identifier.toLowerCase().includes("kuldeep.choudhary") ? "GTF-1042" : "GTF-1005"))
     : identifier;
 
   if (mockEmployees[cleanId]) {
@@ -102,16 +102,16 @@ export async function POST(request: Request) {
     const profile = getEmployeeProfile(identifier);
     const signedSessionCookie = await signToken(profile.employeeId);
 
-    const maxAge = rememberMe ? 2_592_000 : 86_400; // 30 days or 1 day
+    const maxAge = rememberMe ? 2_592_000 : 86_400;
     const secure = process.env.NODE_ENV === "production";
-    
+
     const cookieStore = await cookies();
     cookieStore.set("rm_session", signedSessionCookie, {
       path: "/",
       maxAge,
       sameSite: "strict",
       secure,
-      httpOnly: false, // httpOnly is false because client Redux reads cookie presence (but it is signed, so protected against tampering!)
+      httpOnly: false,
     });
 
     cookieStore.set("rm_role", profile.role, {

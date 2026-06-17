@@ -11,7 +11,6 @@ const sendNudgeSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    // 1. Authenticate request using signed session cookie
     const cookieStore = await cookies();
     const cookieVal = cookieStore.get("rm_session")?.value;
     const verifiedEmployeeId = cookieVal ? await verifyToken(cookieVal) : null;
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // 2. Validate input schema using Zod
     const body = await request.json();
     const result = sendNudgeSchema.safeParse(body);
     if (!result.success) {
@@ -30,7 +28,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Mock Email Send latency (simulate email delivery)
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     return NextResponse.json({
