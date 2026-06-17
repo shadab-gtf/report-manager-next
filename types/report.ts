@@ -1,10 +1,11 @@
 export type TaskPriority = "Low" | "Medium" | "High" | "Critical";
-export type TaskStatus = "Pending" | "In Progress" | "Completed" | "Blocked";
+export type TaskStatus = "Pending" | "In Progress" | "Completed" | "Aborted";
 export type MeetingType = "Meeting" | "Call" | "Review" | "Standup";
-export type ReportStatus = "Draft" | "Submitted" | "Queued" | "Approved";
+export type ReportStatus = "Draft" | "Submitted" | "Queued" | "Approved" | "Missed";
 
 export interface TaskLogItem {
   id: string;
+  title?: string;
   description: string;
   category: string;
   priority: TaskPriority;
@@ -44,8 +45,9 @@ export interface DailyReportDraft {
 
 export interface ReportHistoryFilters {
   query: string;
-  status: "All" | ReportStatus;
+  status: "All" | ReportStatus | "Missed";
   page: number;
+  datePreset?: string;
 }
 
 export interface ReportHistoryResult {

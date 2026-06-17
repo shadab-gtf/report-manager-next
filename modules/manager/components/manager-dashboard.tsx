@@ -185,16 +185,6 @@ export function ManagerDashboard() {
                 <ArrowRightIcon className="h-4 w-4 text-muted-foreground shrink-0" />
               </Link>
 
-              <Link
-                href="/manager/missing-reports"
-                className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:bg-muted transition-colors text-left"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">Compliance Track</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">List of missing submissions</p>
-                </div>
-                <ArrowRightIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-              </Link>
 
               <Link
                 href="/manager/analytics"

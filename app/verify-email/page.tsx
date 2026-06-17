@@ -12,7 +12,7 @@ export default function VerifyEmailPage() {
       description="Enter the OTP sent to your registered work email."
     >
       <div className="grid gap-4">
-        <label className="grid gap-2 text-sm font-semibold text-foreground">
+        <label className="grid gap-2 text-sm font-normal text-foreground">
           OTP
           <input
             defaultValue="123456"

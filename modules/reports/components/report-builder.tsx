@@ -10,9 +10,14 @@ import { EodNotesStep } from "./report-builder/eod-notes-step";
 import { PreviewAndSubmitStep } from "./report-builder/preview-and-submit-step";
 import type { EndOfDayNotes } from "@/types/report";
 import { toast } from "sonner";
-import { EnvelopeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, PaperAirplaneIcon, ChevronRightIcon, ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
 
-const steps = ["Task Log", "Meetings & Calls", "EOD Notes", "Preview"];
+const steps = [
+  { label: "Task Log", subtitle: "What you worked on" },
+  { label: "Meetings & Calls", subtitle: "Meetings & discussions" },
+  { label: "End of Day Notes", subtitle: "Summary & plan" },
+  { label: "Preview", subtitle: "Review & submit" },
+];
 
 export function ReportBuilder() {
   const [step, setStep] = useState(0);
@@ -108,35 +113,84 @@ export function ReportBuilder() {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 shadow-sm">
-      {/* Wizard Header / Step Indicators */}
-      <div className="flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-center lg:justify-between">
+    <>
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-card-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Create Daily Report
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Autosave active · {isOnline ? "Online" : "Offline queue mode"} ·{" "}
-            {lastSavedAt ? `Saved ${new Date(lastSavedAt).toLocaleTimeString()}` : "Preparing draft"}
-          </p>
+          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-emerald-600">
+              <CheckCircleIcon className="h-4 w-4" />
+              <span className="font-medium">Autosave active</span>
+            </div>
+            <span>·</span>
+            <div className="flex items-center gap-1.5">
+              <ClockIcon className="h-4 w-4" />
+              <span>{lastSavedAt ? `Saved just now` : "Preparing draft"}</span>
+            </div>
+          </div>
         </div>
-        <div className="flex overflow-x-auto pb-2 gap-2 sm:grid sm:grid-cols-4 sm:pb-0 scrollbar-hide">
-          {steps.map((label, index) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setStep(index)}
-              className={
-                index === step
-                  ? "min-h-10 whitespace-nowrap rounded-md bg-primary px-3 text-xs font-semibold text-white shrink-0"
-                  : "min-h-10 whitespace-nowrap rounded-md border border-border px-3 text-xs font-semibold text-muted-foreground hover:bg-muted shrink-0"
-              }
-            >
-              {index + 1}. {label}
-            </button>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={step !== 3 || isEmailing}
+          className="min-h-11 rounded-md bg-[#2563eb] px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-sm"
+        >
+          <PaperAirplaneIcon className="h-4 w-4" />
+          {isEmailing ? "Submitting..." : "Preview & Submit"}
+        </button>
+      </div>
+
+      <section className="rounded-xl border border-border bg-card shadow-sm mb-6 overflow-hidden">
+        <div className="flex overflow-x-auto items-center px-2 py-3 scrollbar-hide">
+          {steps.map((s, index) => (
+            <div key={s.label} className="flex items-center shrink-0 min-w-max">
+              <button
+                type="button"
+                onClick={() => setStep(index)}
+                className={`relative flex items-center gap-3 text-left focus:outline-none px-4 py-3 transition-colors ${
+                  index === step ? "" : "opacity-60 hover:opacity-100"
+                }`}
+              >
+                <span
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                    index === step
+                      ? "bg-blue-50 text-[#2563eb]"
+                      : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {index + 1}
+                </span>
+                <span className="flex flex-col">
+                  <span
+                    className={`text-sm font-bold ${
+                      index === step ? "text-[#2563eb]" : "text-card-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                  <span className={`text-xs font-medium ${index === step ? "text-[#2563eb]/70" : "text-muted-foreground"}`}>
+                    {s.subtitle}
+                  </span>
+                </span>
+                {index === step && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2563eb]" />
+                )}
+              </button>
+              
+              {index < steps.length - 1 && (
+                <div className="px-6 flex items-center justify-center">
+                  <div className="h-px bg-border w-8" />
+                  <ChevronRightIcon className="h-4 w-4 text-border -ml-1" />
+                </div>
+              )}
+            </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
 
       {/* Step Renderers */}
       <AnimatePresence mode="wait">
@@ -190,35 +244,38 @@ export function ReportBuilder() {
       </AnimatePresence>
 
       {/* Wizard Footer Nav */}
-      <div className="mt-6 flex justify-between border-t border-border pt-5">
+      <div className="mt-8 flex justify-between border-t border-border pt-6">
         <button
           type="button"
           disabled={step === 0}
           onClick={() => setStep((value) => Math.max(0, value - 1))}
-          className="min-h-11 rounded-md border border-border px-4 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50 cursor-pointer"
+          className="flex min-h-11 items-center gap-2 rounded-md border border-border bg-card px-5 text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-50 cursor-pointer shadow-sm transition-colors"
         >
+          <ArrowLeftIcon className="h-4 w-4" />
           Back
         </button>
         {step < steps.length - 1 ? (
           <button
             type="button"
             onClick={() => setStep((value) => Math.min(steps.length - 1, value + 1))}
-            className="min-h-11 rounded-md bg-primary px-4 text-sm font-semibold text-white hover:bg-primary-hover cursor-pointer"
+            className="flex min-h-11 items-center gap-2 rounded-md bg-[#2563eb] px-5 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer shadow-sm transition-colors"
           >
-            Continue
+            Next: {steps[step + 1].label}
+            <ArrowRightIcon className="h-4 w-4" />
           </button>
         ) : (
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isEmailing}
-            className="min-h-11 rounded-md bg-primary px-5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50 cursor-pointer flex items-center gap-2"
+            className="min-h-11 rounded-md bg-[#2563eb] px-6 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 cursor-pointer flex items-center gap-2 shadow-sm transition-colors"
           >
-            {isOnline ? <EnvelopeIcon className="h-4 w-4" /> : <PaperAirplaneIcon className="h-4 w-4" />}
-            {isEmailing ? "Submitting..." : isOnline ? "Submit Daily Report" : "Queue Offline Submission"}
+            <PaperAirplaneIcon className="h-4 w-4" />
+            {isEmailing ? "Submitting..." : "Submit Daily Report"}
           </button>
         )}
       </div>
-    </section>
+      </section>
+    </>
   );
 }

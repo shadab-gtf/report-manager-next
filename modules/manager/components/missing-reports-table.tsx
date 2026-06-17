@@ -7,7 +7,18 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ExclamationCircleIcon, EnvelopeIcon, CalendarDaysIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { 
+  ExclamationCircleIcon, 
+  EnvelopeIcon, 
+  CalendarDaysIcon, 
+  XMarkIcon,
+  BellAlertIcon,
+  ChevronUpDownIcon,
+  ComputerDesktopIcon,
+  PhoneIcon,
+  BriefcaseIcon,
+  ClockIcon
+} from "@heroicons/react/24/outline";
 import { useMissingReports } from "../hooks/use-manager-analytics";
 import { MissingReport } from "../types/manager";
 import type { DatePreset } from "../services/manager-service";
@@ -70,6 +81,31 @@ function CustomDateRange({
 
 const columnHelper = createColumnHelper<MissingReport>();
 
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-green-100 text-green-700",
+    "bg-yellow-100 text-yellow-700",
+    "bg-blue-100 text-blue-700",
+    "bg-red-100 text-red-700",
+    "bg-primary-light text-primary",
+    "bg-pink-100 text-pink-700",
+    "bg-orange-100 text-orange-700",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[hash % colors.length];
+};
+
 export function MissingReportsTable() {
   const [filter, setFilter] = useState<DatePreset>("Today");
   const [customStart, setCustomStart] = useState("");
@@ -84,43 +120,81 @@ export function MissingReportsTable() {
   const columns = useMemo(
     () => [
       columnHelper.accessor("employeeName", {
-        header: "Employee Name",
-        cell: (info) => (
-          <div>
-            <p className="font-semibold text-foreground">{info.getValue()}</p>
-            <p className="text-xs text-muted-foreground font-mono">{info.row.original.employeeId}</p>
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            EMPLOYEE NAME
+            <ChevronUpDownIcon className="h-3 w-3" />
           </div>
         ),
+        cell: (info) => {
+          const name = info.getValue();
+          return (
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${getAvatarColor(
+                  name
+                )}`}
+              >
+                {getInitials(name)}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{name}</p>
+                <p className="text-xs text-slate-500">{info.row.original.employeeId}</p>
+              </div>
+            </div>
+          );
+        },
       }),
       columnHelper.accessor("department", {
-        header: "Department",
-        cell: (info) => <span className="text-sm font-medium">{info.getValue()}</span>,
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            DEPARTMENT
+            <ChevronUpDownIcon className="h-3 w-3" />
+          </div>
+        ),
+        cell: (info) => {
+          const dept = info.getValue();
+          return (
+            <span className="text-sm font-medium text-slate-700">{dept}</span>
+          );
+        },
       }),
       columnHelper.accessor("daysMissed", {
-        header: "Days Missed",
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            DAYS MISSED
+            <ChevronUpDownIcon className="h-3 w-3" />
+          </div>
+        ),
         cell: (info) => {
           const days = info.getValue();
           return (
-            <span
-              className={`rounded-md px-2.5 py-1 text-xs font-semibold ${days >= 5
-                ? "bg-red-100 text-red-800 border border-red-200"
-                : days >= 3
-                  ? "bg-orange-100 text-orange-800 border border-orange-200"
-                  : "bg-yellow-100 text-yellow-800 border border-yellow-200"
-                }`}
-            >
+            <div className="inline-flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 border border-amber-100">
+              <ExclamationCircleIcon className="h-3.5 w-3.5" />
               {days} {days === 1 ? "day" : "days"} missed
-            </span>
+            </div>
           );
         },
       }),
       columnHelper.accessor("lastSubmission", {
-        header: "Last Submission",
-        cell: (info) => <span className="text-sm text-muted-foreground">{info.getValue()}</span>,
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            LAST SUBMISSION
+            <ChevronUpDownIcon className="h-3 w-3" />
+          </div>
+        ),
+        cell: (info) => (
+          <div className="flex items-center gap-1.5 text-sm text-slate-500">
+            <ClockIcon className="h-4 w-4 opacity-70" />
+            {info.getValue()}
+          </div>
+        ),
       }),
       columnHelper.display({
         id: "actions",
-        header: "Remind",
+        header: () => (
+          <div className="text-[11px] font-bold text-slate-500">REMIND</div>
+        ),
         cell: (info) => {
           const row = info.row.original;
           const mockEmail = `${row.employeeName.toLowerCase().replace(/\s+/g, ".")}@company.com`;
@@ -132,7 +206,7 @@ export function MissingReportsTable() {
           return (
             <Link
               href={`mailto:${mockEmail}?subject=${subject}&body=${body}`}
-              className="inline-flex items-center gap-1 rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-light transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-primary hover:bg-slate-50 transition-colors"
             >
               <EnvelopeIcon className="h-3.5 w-3.5" />
               Nudge
@@ -153,13 +227,13 @@ export function MissingReportsTable() {
   return (
     <PageTransition className="grid gap-6">
       {/* Title block */}
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm flex items-start gap-4">
-        <div className="rounded-full bg-danger-light p-3 text-danger shrink-0">
-          <ExclamationCircleIcon className="h-6 w-6" />
+      <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500">
+          <BellAlertIcon className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-card-foreground">Missing Reports Tracker</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="text-xl font-bold text-slate-900">Missing Reports Tracker</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Track which team members have missed daily submissions and nudge them to update.
           </p>
         </div>
@@ -171,21 +245,19 @@ export function MissingReportsTable() {
           tabs={DATE_PRESETS.map((preset) => ({
             id: preset.key,
             label: (
-              <>
-                {preset.key === "Custom" && (
-                  <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
-                )}
+              <div className="flex items-center gap-1.5">
+                <CalendarDaysIcon className="h-3.5 w-3.5" />
                 {preset.label}
-              </>
+              </div>
             ),
           }))}
           activeTab={filter}
           onTabChange={(tab) => setFilter(tab as DatePreset)}
           layoutId="missing-reports-date-filter"
           className="flex flex-wrap items-center gap-2"
-          tabClassName="relative rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-border bg-card hover:border-primary/30 focus:outline-none"
+          tabClassName="relative rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-slate-200 bg-white hover:border-primary/30 focus:outline-none"
           activeTabClassName="text-white border-transparent bg-transparent"
-          indicatorClassName="absolute inset-0 rounded-full bg-primary shadow-sm"
+          indicatorClassName="absolute inset-0 rounded-lg bg-primary shadow-sm"
         />
 
         {filter === "Custom" && (

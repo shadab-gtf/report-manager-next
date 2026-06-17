@@ -140,34 +140,22 @@ export function BiometricToggle({ employeeId }: BiometricToggleProps) {
   const isProcessing = state === "registering" || state === "disabling";
 
   return (
-    <div className="rounded-lg border border-border bg-background p-5">
-      <div className="flex items-start gap-4">
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="flex items-center gap-4">
         {/* Icon */}
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors ${
-            enabled
-              ? "bg-success/10 text-success"
-              : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {enabled ? (
-            <ShieldCheckIcon className="h-6 w-6" />
-          ) : (
-            <FingerprintIcon className="h-6 w-6" />
-          )}
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors ${enabled ? "bg-green-50 text-green-600" : "bg-slate-100 text-slate-500"}`}>
+          <FingerprintIcon className="h-6 w-6" />
         </div>
 
         {/* Text content */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">
+              <p className="text-sm font-bold text-slate-900">
                 Biometric Login
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {enabled
-                  ? "Sign in using Face ID or fingerprint on this device."
-                  : "Enable quick sign-in with Face ID or fingerprint."}
+              <p className="mt-0.5 text-xs text-slate-500">
+                Enable quick sign-in with Face ID or fingerprint.
               </p>
             </div>
 
@@ -180,7 +168,7 @@ export function BiometricToggle({ employeeId }: BiometricToggleProps) {
               disabled={isProcessing}
               onClick={handleToggle}
               className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50 ${
-                enabled ? "bg-primary" : "bg-muted-foreground/25"
+                enabled ? "bg-green-600" : "bg-slate-200"
               }`}
             >
               <span
@@ -193,7 +181,7 @@ export function BiometricToggle({ employeeId }: BiometricToggleProps) {
 
           {/* Processing state */}
           {isProcessing ? (
-            <div className="mt-3 flex items-center gap-2 text-xs text-primary">
+            <div className="mt-3 flex items-center gap-2 text-xs text-green-600">
               <span className="block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               <span>
                 {state === "registering"
@@ -205,7 +193,7 @@ export function BiometricToggle({ employeeId }: BiometricToggleProps) {
 
           {/* Error */}
           {errorMessage ? (
-            <p className="mt-3 text-xs text-danger" role="alert">
+            <p className="mt-3 text-xs text-red-500" role="alert">
               {errorMessage}
             </p>
           ) : null}

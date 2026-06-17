@@ -16,6 +16,12 @@ import {
   ExclamationCircleIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
+  ChevronDownIcon,
+  Squares2X2Icon,
+  PencilSquareIcon,
+  DocumentTextIcon,
+  PhoneIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,13 +34,9 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleSidebar, clearSession } from "@/store/store";
 
 const navigationItems = [
-  { label: "Dashboard", href: "/dashboard", segment: "dashboard", icon: HomeIcon },
-  {
-    label: "Reports",
-    href: "/reports",
-    segment: "reports",
-    icon: ClipboardDocumentListIcon,
-  },
+  { label: "Dashboard", href: "/dashboard", segment: "dashboard", icon: Squares2X2Icon },
+  { label: "Create Daily Report", href: "/reports/create", segment: "reports/create", icon: PencilSquareIcon },
+  { label: "My Reports", href: "/reports", segment: "reports", icon: DocumentTextIcon },
   { label: "Profile", href: "/profile", segment: "profile", icon: UserCircleIcon },
 ];
 
@@ -66,6 +68,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
   const segment =
     activeSegment ?? navigation.find((item) => pathname.startsWith(item.href))?.segment ?? "dashboard";
   const name = session?.name ?? (isManager ? "Manager" : "Employee");
+  const email = session?.email ?? (isManager ? "manager@gtftechnologies.com" : "employee@gtftechnologies.com");
 
   const handleLogout = () => {
     window.localStorage.removeItem("report-manager-session");
@@ -91,6 +94,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
             onToggle={() => dispatch(toggleSidebar())}
             onLogout={handleLogout}
             name={name}
+            email={email}
             isManager={isManager}
           />
         </aside>
@@ -111,6 +115,7 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
                 onToggle={() => setMobileOpen(false)}
                 onLogout={handleLogout}
                 name={name}
+                email={email}
                 isManager={isManager}
                 mobileClose
               />
@@ -147,8 +152,11 @@ export function AppShell({ children, activeSegment }: AppShellProps) {
                 {!isManager ? (
                   <Link
                     href="/reports/create"
-                    className="inline-flex min-h-10 items-center rounded bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    className="inline-flex cursor-pointer items-center gap-3 rounded-lg bg-primary p-1.5 pr-4 text-sm font-bold text-white transition-colors hover:bg-primary-hover shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/20">
+                      <PlusIcon aria-hidden="true" className="h-5 w-5 stroke-2 text-white" />
+                    </div>
                     Create Report
                   </Link>
                 ) : null}
@@ -171,6 +179,7 @@ function SidebarContent({
   onToggle,
   onLogout,
   name,
+  email,
   isManager,
   mobileClose = false,
 }: {
@@ -180,9 +189,13 @@ function SidebarContent({
   onToggle: () => void;
   onLogout: () => void;
   name: string;
+  email: string;
   isManager: boolean;
   mobileClose?: boolean;
 }) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const initials = name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
+
   return (
     <div className="flex h-full flex-col py-4">
       <div className={`flex items-center px-4 ${collapsed ? "justify-center" : "justify-between"}`}>
@@ -232,7 +245,7 @@ function SidebarContent({
       <nav aria-label="Primary navigation" className="mt-6 grid gap-1 pr-4">
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active = item.segment === segment || (item.segment !== "profile" && segment.startsWith(item.segment));
+          const active = item.segment === segment || (segment.startsWith(item.segment) && item.segment !== "dashboard" && item.segment !== "reports");
           return (
             <Link
               key={item.href}
@@ -264,28 +277,54 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="mt-auto pr-4">
+      <div className="mt-auto relative pr-4 pl-4 pb-4">
+        <AnimatePresence>
+          {showUserMenu && !collapsed && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-[calc(100%+8px)] left-4 right-4 rounded-xl border border-border bg-white shadow-lg overflow-hidden z-50"
+            >
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-danger hover:bg-danger/10 transition-colors"
+              >
+                <ArrowLeftOnRectangleIcon className="h-4 w-4 shrink-0" />
+                Logout
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           type="button"
-          onClick={onLogout}
-          className={`flex w-full min-h-10 cursor-pointer items-center gap-4 rounded-e-full pl-6 pr-4 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-muted ${collapsed ? "justify-center pl-0" : ""
-            }`}
-          title={collapsed ? "Logout" : undefined}
+          onClick={() => collapsed ? onLogout() : setShowUserMenu(!showUserMenu)}
+          className={`flex w-full items-center gap-3 rounded-2xl border border-border/50 bg-white p-2 transition-all hover:bg-muted shadow-sm hover:shadow-md ${
+            collapsed ? "justify-center" : "justify-between"
+          }`}
+          title={collapsed ? "Logout" : "User Menu"}
         >
-          <ArrowLeftOnRectangleIcon className="h-5 w-5 shrink-0" />
-          <AnimatePresence initial={false}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#7c3aed] text-sm font-bold text-white">
+              {initials}
+            </div>
             {!collapsed && (
-              <motion.span
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "auto", opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden whitespace-nowrap"
-              >
-                Logout
-              </motion.span>
+              <div className="flex flex-col items-start min-w-0 text-left">
+                <span className="block truncate text-sm font-bold text-[#334155] max-w-[120px]">
+                  {name}
+                </span>
+                <span className="block truncate text-xs font-medium text-muted-foreground max-w-[120px]">
+                  {email}
+                </span>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
+          {!collapsed && (
+            <ChevronDownIcon className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${showUserMenu ? "rotate-180" : ""}`} />
+          )}
         </button>
       </div>
     </div>

@@ -46,7 +46,7 @@ const seedReports: DailyReportDraft[] = [
     id: "report-2026-06-13",
     employeeId: "GTF-1042",
     reportDate: "2026-06-13",
-    status: "Approved",
+    status: "Submitted",
     updatedAt: "2026-06-13T18:10:00.000Z",
     submittedAt: "2026-06-13T18:10:00.000Z",
     tasks: [],
@@ -80,7 +80,35 @@ export async function listReports(
   seedReports.forEach((r) => reportMap.set(r.id, r));
   dbReports.forEach((r) => reportMap.set(r.id, r));
 
-  const allReports = Array.from(reportMap.values());
+  const allReports: DailyReportDraft[] = Array.from(reportMap.values()).map(r => ({
+    ...r,
+    status: ((r.status as any) === "Missed" ? "Missed" : "Submitted") as any
+  }));
+
+  // Generate missed reports for the past 30 days
+  const existingDates = new Set(allReports.map((r) => r.reportDate));
+  const today = new Date();
+  for (let i = 0; i <= 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+    if (!existingDates.has(dateStr)) {
+      allReports.push({
+        id: `missed-${dateStr}`,
+        employeeId: "GTF-1042", // Assuming current user
+        reportDate: dateStr,
+        status: "Missed" as any,
+        updatedAt: dateStr + "T00:00:00.000Z",
+        tasks: [],
+        meetings: [],
+        notes: { pending: "", blockers: "", tomorrowPlan: "" },
+      });
+    }
+  }
+
   const normalizedQuery = filters.query.trim().toLowerCase();
 
   const filtered = allReports.filter((report) => {
@@ -90,8 +118,38 @@ export async function listReports(
       normalizedQuery.length === 0 ||
       report.reportDate.includes(normalizedQuery) ||
       report.status.toLowerCase().includes(normalizedQuery);
+    
+    let dateMatches = true;
+    if (filters.datePreset && filters.datePreset !== "All") {
+      const reportDate = new Date(report.reportDate);
+      const limitDate = new Date();
+      switch (filters.datePreset) {
+        case "Today":
+          // reportDate is already just the date part. Compare exactly.
+          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+          dateMatches = report.reportDate === todayStr;
+          break;
+        case "7Days":
+          limitDate.setDate(today.getDate() - 7);
+          dateMatches = reportDate >= limitDate;
+          break;
+        case "10Days":
+          limitDate.setDate(today.getDate() - 10);
+          dateMatches = reportDate >= limitDate;
+          break;
+        case "15Days":
+          limitDate.setDate(today.getDate() - 15);
+          dateMatches = reportDate >= limitDate;
+          break;
+        case "1Month":
+        case "30Days":
+          limitDate.setDate(today.getDate() - 30);
+          dateMatches = reportDate >= limitDate;
+          break;
+      }
+    }
 
-    return statusMatches && queryMatches;
+    return statusMatches && queryMatches && dateMatches;
   });
 
   // Sort by reportDate

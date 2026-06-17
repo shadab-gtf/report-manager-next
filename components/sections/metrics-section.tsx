@@ -8,8 +8,7 @@ interface MetricsSectionProps {
 
 export function MetricsSection({ metrics }: MetricsSectionProps) {
   return (
-    // <section aria-label="Productivity metrics" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-    <section aria-label="Productivity metrics" className="hidden">
+    <section aria-label="Productivity metrics" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {metrics.map((metric) => (
         <MetricCard key={metric.label} metric={metric} />
       ))}

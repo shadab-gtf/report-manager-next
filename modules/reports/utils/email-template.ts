@@ -48,13 +48,7 @@ export function escapeHtmlMultiline(str: string | undefined | null): string {
 }
 
 export function generateHtmlEmail(data: EmailTemplateData): string {
-  // Pad tasks array to at least 12 rows to match the visual height of the image, or render what's passed
-  const paddedTasks = [...data.tasks];
-  while (paddedTasks.length < Math.max(12, data.tasks.length)) {
-    paddedTasks.push({});
-  }
-
-  const tasksHtml = paddedTasks.map((task, i) => `
+  const tasksHtml = data.tasks.map((task, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
       <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.description ? escapeHtml(task.description) : "&nbsp;"}</td>
@@ -68,12 +62,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
     </tr>
   `).join("");
 
-  const paddedMeetings = [...data.meetings];
-  while (paddedMeetings.length < Math.max(6, data.meetings.length)) {
-    paddedMeetings.push({});
-  }
-
-  const meetingsHtml = paddedMeetings.map((meeting, i) => `
+  const meetingsHtml = data.meetings.map((meeting, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
       <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.subject ? escapeHtml(meeting.subject) : "&nbsp;"}</td>
@@ -161,6 +150,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tfoot>
       </table>
 
+      ${data.meetings && data.meetings.length > 0 ? `
       <!-- Meetings & Calls Log -->
       <div style="background-color: #6b2288; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
         📞 MEETINGS & CALLS LOG
@@ -181,6 +171,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
           ${meetingsHtml}
         </tbody>
       </table>
+      ` : ""}
 
       <!-- End of Day Notes -->
       <div style="background-color: #df7622; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
@@ -257,10 +248,10 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
           <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Meetings Today</td>
           <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${data.meetings.length} meetings</td>
         </tr>
-        <tr>
+        <!-- <tr>
           <td style="background-color: #23304c; color: #ffffff; padding: 10px 12px; font-size: 10px; font-weight: bold; border: 1px solid #23304c;">⭐ OVERALL PRODUCTIVITY SCORE</td>
           <td style="padding: 10px 12px; border: 1px solid #23304c; background-color: #fff9c4; color: #333; font-weight: bold; text-align: center; font-size: 13px;">${data.overallScore || '—'}</td>
-        </tr>
+        </tr> -->
       </table>
 
       <!-- Footer Signatures -->

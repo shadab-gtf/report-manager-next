@@ -11,7 +11,7 @@ export const taskStatuses: TaskStatus[] = [
   "Pending",
   "In Progress",
   "Completed",
-  "Blocked",
+  "Aborted",
 ];
 
 export const meetingTypes: MeetingType[] = [

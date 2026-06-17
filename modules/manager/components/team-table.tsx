@@ -8,98 +8,121 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  EyeIcon,
+  ClockIcon,
+  ChevronUpDownIcon,
+  UsersIcon,
+} from "@heroicons/react/24/outline";
 import { useTeam } from "../hooks/use-team";
 import { TeamMember } from "../types/manager";
-import { AnimatedTabs } from "@/components/motion/animated-tabs";
 import { PageTransition } from "@/components/motion/page-transition";
 
 const columnHelper = createColumnHelper<TeamMember>();
 
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-green-100 text-green-700",
+    "bg-yellow-100 text-yellow-700",
+    "bg-blue-100 text-blue-700",
+    "bg-red-100 text-red-700",
+    "bg-primary-light text-primary",
+    "bg-pink-100 text-pink-700",
+    "bg-orange-100 text-orange-700",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[hash % colors.length];
+};
+
 export function TeamTable() {
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | "Submitted" | "Missing">("All");
 
   const { data: team = [], isLoading } = useTeam({
     query,
-    statusToday: statusFilter,
   });
 
   const columns = useMemo(
     () => [
       columnHelper.accessor("employeeId", {
-        header: "Employee ID",
-        cell: (info) => <span className="font-mono text-xs font-semibold">{info.getValue()}</span>,
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            EMPLOYEE ID
+            <ChevronUpDownIcon className="h-3 w-3" />
+          </div>
+        ),
+        cell: (info) => <span className="  text-xs font-bold text-slate-700">{info.getValue()}</span>,
       }),
       columnHelper.accessor("name", {
-        header: "Employee Name",
-        cell: (info) => (
-          <div>
-            <p className="font-semibold text-foreground">{info.getValue()}</p>
-            <p className="text-xs text-muted-foreground">{info.row.original.email}</p>
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            EMPLOYEE NAME
+            <ChevronUpDownIcon className="h-3 w-3" />
           </div>
         ),
-      }),
-      columnHelper.accessor("department", {
-        header: "Department",
-        cell: (info) => (
-          <div>
-            <p className="text-sm font-medium">{info.getValue()}</p>
-            <p className="text-xs text-muted-foreground">{info.row.original.designation}</p>
-          </div>
-        ),
-      }),
-      columnHelper.accessor("complianceRate", {
-        header: "Compliance",
         cell: (info) => {
-          const rate = info.getValue();
+          const name = info.getValue();
           return (
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-16 overflow-hidden rounded-full bg-muted-foreground/10">
-                <div
-                  className={`h-full rounded-full ${
-                    rate >= 95 ? "bg-success" : rate >= 85 ? "bg-primary" : "bg-danger"
-                  }`}
-                  style={{ width: `${rate}%` }}
-                />
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${getAvatarColor(
+                  name
+                )}`}
+              >
+                {getInitials(name)}
               </div>
-              <span className="text-xs font-semibold">{rate}%</span>
+              <div>
+                <p className="text-sm font-bold text-slate-900">{name}</p>
+                <p className="text-xs text-slate-500">{info.row.original.email}</p>
+              </div>
             </div>
           );
         },
       }),
-      columnHelper.accessor("statusToday", {
-        header: "Today's Status",
-        cell: (info) => {
-          const status = info.getValue();
-          return (
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                status === "Submitted"
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
-              }`}
-            >
-              {status}
-            </span>
-          );
-        },
+      columnHelper.accessor("department", {
+        header: () => (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
+            DEPARTMENT
+            <ChevronUpDownIcon className="h-3 w-3" />
+          </div>
+        ),
+        cell: (info) => (
+          <div>
+            <p className="text-sm font-bold text-slate-900">{info.getValue()}</p>
+            <p className="text-xs text-slate-500">{info.row.original.designation}</p>
+          </div>
+        ),
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: () => (
+          <div className="text-[11px] font-bold text-slate-500">ACTIONS</div>
+        ),
         cell: (info) => (
           <div className="flex items-center gap-2">
             <Link
               href={`/manager/team/${info.row.original.employeeId}`}
-              className="rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary-light"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-primary hover:bg-slate-50 transition-colors"
             >
+              <EyeIcon className="h-3.5 w-3.5" />
               View Detail
             </Link>
             <Link
               href={`/manager/team/${info.row.original.employeeId}/history`}
-              className="rounded border border-border bg-white px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
             >
+              <ClockIcon className="h-3.5 w-3.5" />
               History
             </Link>
           </div>
@@ -118,34 +141,29 @@ export function TeamTable() {
   return (
     <PageTransition className="grid gap-6">
       {/* Header Info */}
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-card-foreground">My Team Directory</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          View assigned employees, check today's submission compliance, and browse historical logs.
-        </p>
+      <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-light/50 text-primary">
+          <UsersIcon className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">My Team Directory</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            View assigned employees, check today's submission compliance, and browse historical logs.
+          </p>
+        </div>
       </div>
 
       {/* Filters & Search Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Filter Tabs */}
-        <div className="w-full max-w-[400px]">
-          <AnimatedTabs
-            tabs={["All", "Submitted", "Missing"]}
-            activeTab={statusFilter}
-            onTabChange={(tab) => setStatusFilter(tab as "All" | "Submitted" | "Missing")}
-            layoutId="team-table-tabs"
-          />
-        </div>
-
+      <div className="flex items-center">
         {/* Search Input */}
-        <div className="relative w-full max-w-xs">
-          <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative w-full max-w-sm">
+          <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search name, ID, department..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-10 w-full rounded-md border border-input bg-card pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20 shadow-sm"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
           />
         </div>
       </div>
@@ -170,7 +188,7 @@ export function TeamTable() {
             <tbody className="divide-y divide-border">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-5 py-8 text-center text-sm text-muted-foreground">
                     Loading team directory...
                   </td>
                 </tr>
@@ -186,7 +204,7 @@ export function TeamTable() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-5 py-8 text-center text-sm text-muted-foreground">
                     No team members found matching criteria.
                   </td>
                 </tr>

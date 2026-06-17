@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
       description="Password recovery is prepared for future identity provider integration."
     >
       <form className="grid gap-4">
-        <label className="grid gap-2 text-sm font-semibold text-foreground">
+        <label className="grid gap-2 text-sm font-normal text-foreground">
           Employee ID or official email
           <input className="h-11 rounded-md border border-input bg-background px-3 text-sm font-normal outline-none focus:border-primary focus:ring-2 focus:ring-ring/20" />
         </label>

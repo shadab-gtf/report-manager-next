@@ -46,9 +46,11 @@ export function InstallPrompt() {
         await installEvent.userChoice;
         setInstallEvent(null);
       }}
-      className="hidden min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground hover:bg-muted sm:inline-flex"
+      className="hidden cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white p-1.5 pr-4 text-sm font-bold text-slate-800 transition-colors hover:bg-slate-50 shadow-sm sm:inline-flex"
     >
-      <ArrowDownTrayIcon aria-hidden="true" className="h-4 w-4" />
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-700">
+        <ArrowDownTrayIcon aria-hidden="true" className="h-4 w-4 stroke-2" />
+      </div>
       Install the App
     </button>
   );

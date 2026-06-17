@@ -20,6 +20,7 @@ import {
   XMarkIcon,
   CalendarDaysIcon,
   PaperAirplaneIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import {
@@ -42,6 +43,31 @@ const DATE_PRESETS: Array<{ key: DatePreset; label: string }> = [
   { key: "Custom", label: "Custom Date" },
 ];
 
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-green-100 text-green-700",
+    "bg-yellow-100 text-yellow-700",
+    "bg-blue-100 text-blue-700",
+    "bg-red-100 text-red-700",
+    "bg-primary-light text-primary",
+    "bg-pink-100 text-pink-700",
+    "bg-orange-100 text-orange-700",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[hash % colors.length];
+};
+
 export function TeamReports() {
   return (
     <Suspense
@@ -56,9 +82,6 @@ export function TeamReports() {
   );
 }
 
-// ─────────────────────────────────────────────
-// Employee Dropdown
-// ─────────────────────────────────────────────
 interface EmployeeDropdownProps {
   employees: Array<{ employeeId: string; employeeName: string }>;
   value: string;
@@ -144,8 +167,8 @@ function EmployeeDropdown({ employees, value, onChange }: EmployeeDropdownProps)
                 setSearch("");
               }}
               className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${!value
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-foreground hover:bg-muted"
+                ? "bg-primary/10 text-primary font-medium"
+                : "text-foreground hover:bg-muted"
                 }`}
             >
               {!value && <CheckIcon className="h-3.5 w-3.5" />}
@@ -164,14 +187,14 @@ function EmployeeDropdown({ employees, value, onChange }: EmployeeDropdownProps)
                     setSearch("");
                   }}
                   className={`flex items-center gap-2 px-3 py-2 text-sm cursor-pointer transition-colors ${isSelected
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-foreground hover:bg-muted"
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground hover:bg-muted"
                     }`}
                 >
                   {isSelected && <CheckIcon className="h-3.5 w-3.5" />}
                   <span className={isSelected ? "" : "pl-5.5"}>
                     {emp.employeeName}{" "}
-                    <span className="text-muted-foreground font-mono text-xs">
+                    <span className="text-muted-foreground   text-xs">
                       ({emp.employeeId})
                     </span>
                   </span>
@@ -488,13 +511,16 @@ function TeamReportsContent() {
   return (
     <PageTransition className="grid gap-6" suppressHydrationWarning>
       {/* ── Header + Date Filter Row ── */}
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-light/50 text-primary">
+            <ClipboardDocumentCheckIcon className="h-6 w-6" />
+          </div>
           <div>
-            <h1 className="text-2xl font-semibold text-card-foreground">
+            <h1 className="text-xl font-bold text-slate-900">
               Team Reports Center
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-slate-500">
               Review, comment, and sign off on daily reports submitted by your
               operations team.
             </p>
@@ -502,26 +528,24 @@ function TeamReportsContent() {
         </div>
 
         {/* Date filter pills */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <AnimatedTabs
             tabs={DATE_PRESETS.map((preset) => ({
               id: preset.key,
               label: (
-                <>
-                  {preset.key === "Custom" && (
-                    <CalendarDaysIcon className="mr-1 inline h-3.5 w-3.5 -mt-px" />
-                  )}
+                <div className="flex items-center gap-1.5">
+                  <CalendarDaysIcon className="h-3.5 w-3.5" />
                   {preset.label}
-                </>
+                </div>
               ),
             }))}
             activeTab={datePreset}
             onTabChange={(tab) => setDatePreset(tab as DatePreset)}
             layoutId="team-reports-date-filter"
             className="flex flex-wrap items-center gap-2"
-            tabClassName="relative rounded-full px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-border bg-card hover:border-primary/30 focus:outline-none"
+            tabClassName="relative rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer border border-slate-200 bg-white hover:border-primary/30 focus:outline-none"
             activeTabClassName="text-white border-transparent bg-transparent"
-            indicatorClassName="absolute inset-0 rounded-full bg-primary shadow-sm"
+            indicatorClassName="absolute inset-0 rounded-lg bg-primary shadow-sm"
           />
 
           {/* Custom Date Range Inputs */}
@@ -574,28 +598,36 @@ function TeamReportsContent() {
                       key={report.id}
                       onClick={() => setSelectedReportId(report.id)}
                       className={`w-full flex items-center justify-between p-3.5 text-left rounded-lg transition-colors cursor-pointer ${isActive
-                          ? "bg-primary-light/40 border-l-4 border-primary"
-                          : "hover:bg-muted"
+                        ? "bg-primary-light/40 border-l-4 border-primary"
+                        : "hover:bg-muted"
                         }`}
                     >
-                      <div className="min-w-0 pr-2 flex-1">
-                        <p className="font-semibold text-sm text-foreground truncate">
-                          {report.employeeName}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                          {report.employeeId}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                            <CalendarIcon className="h-3 w-3" />{" "}
-                            {report.reportDate}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            &bull;
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {report.submittedAt}
-                          </span>
+                      <div className="flex items-center gap-3 pr-2 flex-1 min-w-0">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${getAvatarColor(
+                            report.employeeName
+                          )}`}
+                        >
+                          {getInitials(report.employeeName)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-sm text-slate-900 truncate">
+                            {report.employeeName}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5  ">
+                            {report.employeeId}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+                              <CalendarIcon className="h-3 w-3 opacity-70" />
+                              {report.reportDate}
+                            </span>
+                            <span className="text-[11px] text-slate-400">&bull;</span>
+                            <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
+                              <ClockIcon className="h-3 w-3 opacity-70" />
+                              {report.submittedAt || "5:12 PM"}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div
@@ -604,8 +636,9 @@ function TeamReportsContent() {
                       >
                         <Link
                           href={`/manager/team/${report.employeeId}/history`}
-                          className="rounded border border-border bg-white px-2 py-1 text-[10px] font-semibold text-primary hover:bg-primary-light hover:border-primary/20 transition-colors cursor-pointer inline-block"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-primary hover:bg-slate-50 transition-colors cursor-pointer"
                         >
+                          <ClockIcon className="h-3.5 w-3.5" />
                           History
                         </Link>
                       </div>
@@ -639,15 +672,16 @@ function TeamReportsContent() {
                     <h2 className="text-base font-semibold text-card-foreground">
                       {selectedReport.employeeName}
                     </h2>
-                    <span className="text-xs font-mono text-muted-foreground">
+                    <span className="text-xs   text-muted-foreground">
                       ({selectedReport.employeeId})
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-slate-500 mt-0.5">
                     {selectedReport.department} &bull; Daily Report for{" "}
-                    {selectedReport.reportDate} (Logged:{" "}
+                    {selectedReport.reportDate}
+                    {/*  (Logged:{" "}
                     {selectedReport.hoursLogged} hrs, Completion:{" "}
-                    {selectedReport.completion}%)
+                    {selectedReport.completion}%) */}
                   </p>
                 </div>
 

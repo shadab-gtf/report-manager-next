@@ -33,14 +33,6 @@ export function DashboardPageSection({
         <Suspense fallback={<MetricsSectionSkeleton />}>
           <DashboardOverviewSections overview={overview} />
         </Suspense>
-        <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-          <Suspense fallback={<RecentActivitySectionSkeleton />}>
-            <RecentActivitySection recentReports={recentReports} />
-          </Suspense>
-          <Suspense fallback={<WorkflowSectionSkeleton />}>
-            <WorkflowSection pipeline={pipeline} />
-          </Suspense>
-        </div>
       </div>
     </AppShell>
   );
@@ -56,7 +48,6 @@ async function DashboardOverviewSections({
   return (
     <>
       <DashboardHero overview={data} />
-      <MetricsSection metrics={data.metrics} />
     </>
   );
 }

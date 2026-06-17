@@ -8,7 +8,11 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   CalendarIcon,
+  InformationCircleIcon,
+  MagnifyingGlassIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
+import { AnimatedTabs } from "@/components/motion/animated-tabs";
 import {
   useComplianceTrend,
   useFrequentMissers,
@@ -19,6 +23,39 @@ const ComplianceTrendChart = dynamic(() => import("./compliance-trend-chart"), {
   ssr: false,
   loading: () => <div className="h-[320px] flex items-center justify-center text-xs text-muted-foreground bg-muted/20 rounded">Loading compliance chart...</div>,
 });
+
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-purple-100 text-purple-700",
+    "bg-green-100 text-green-700",
+    "bg-yellow-100 text-yellow-700",
+    "bg-blue-100 text-blue-700",
+    "bg-red-100 text-red-700",
+    "bg-primary-light text-primary",
+    "bg-pink-100 text-pink-700",
+    "bg-orange-100 text-orange-700",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+  return colors[hash % colors.length];
+};
+
+const DATE_PRESETS = [
+  { key: "Today", label: "Today" },
+  { key: 7, label: "7 Days" },
+  { key: 10, label: "10 Days" },
+  { key: 15, label: "15 Days" },
+  { key: 30, label: "30 Days" },
+] as const;
 
 export function AnalyticsDashboard() {
   const [daysCount, setDaysCount] = useState<"Today" | 7 | 10 | 15 | 30>(7);
@@ -52,14 +89,19 @@ export function AnalyticsDashboard() {
   return (
     <div className="grid gap-6">
       {/* Title */}
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-card-foreground">Manager Analytics</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Analyze submission trends, view consistency leaderboards, and identify reporting gaps.
-        </p>
+      <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+          <ChartBarIcon className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900">Manager Analytics</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Analyze submission trends, view consistency leaderboards, and identify reporting gaps.
+          </p>
+        </div>
       </div>
 
-      {/* Stats Summary Panel */}
+      {/* Stats Summary Panel
       <section className="grid gap-4 md:grid-cols-3">
         <article className="rounded-lg border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
@@ -94,27 +136,33 @@ export function AnalyticsDashboard() {
           <p className="mt-1 text-xs text-muted-foreground">Average completion rate for this timeframe</p>
         </article>
       </section>
+      */}
 
       {/* Chart Section */}
-      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-base font-semibold text-card-foreground">Submission Compliance Trend</h2>
-            <p className="text-xs text-muted-foreground">Interactive submission logs timeline</p>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
+              Submission Compliance Trend
+              <InformationCircleIcon className="h-4 w-4 text-slate-400" />
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">Interactive submission logs timeline</p>
           </div>
           
-          <div className="flex rounded border border-border p-0.5 bg-card">
-            {(["Today", 7, 10, 15, 30] as const).map((days) => (
-              <button
-                key={days}
-                onClick={() => setDaysCount(days)}
-                className={`rounded px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
-                  daysCount === days ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {days === "Today" ? "Today" : `${days} Days`}
-              </button>
-            ))}
+          <div className="flex rounded-lg border border-slate-200 bg-white shadow-sm p-1">
+            <AnimatedTabs
+              tabs={DATE_PRESETS.map((preset) => ({
+                id: String(preset.key),
+                label: preset.label,
+              }))}
+              activeTab={String(daysCount)}
+              onTabChange={(tab) => setDaysCount(tab === "Today" ? "Today" : Number(tab) as any)}
+              layoutId="analytics-date-filter"
+              className="flex items-center"
+              tabClassName="relative rounded-md px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer text-slate-600 hover:text-slate-900 focus:outline-none"
+              activeTabClassName="text-white bg-transparent"
+              indicatorClassName="absolute inset-0 rounded-md bg-primary shadow-sm"
+            />
           </div>
         </div>
 
@@ -124,89 +172,123 @@ export function AnalyticsDashboard() {
       {/* Leaderboard Lists */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Most Consistent */}
-        <section className="rounded-lg border border-border bg-card p-6 shadow-sm flex flex-col gap-4">
-          <div className="flex flex-col gap-3 border-b border-border pb-3">
-            <h2 className="text-base font-semibold text-card-foreground flex items-center gap-2">
-              <CheckCircleIcon className="h-5 w-5 text-success" /> Most Consistent Employees
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex flex-col gap-4 border-b border-slate-100 pb-4">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-green-600">
+                <CheckCircleIcon className="h-5 w-5" />
+              </div>
+              Most Consistent Employees
             </h2>
-            <input
-              type="text"
-              placeholder="Search by name, ID, or department..."
-              value={consistentSearch}
-              onChange={(e) => setConsistentSearch(e.target.value)}
-              className="w-full text-xs border border-border rounded px-3 py-1.5 outline-none bg-background focus:border-primary transition-colors"
-            />
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by name, ID, or department..."
+                value={consistentSearch}
+                onChange={(e) => setConsistentSearch(e.target.value)}
+                className="w-full text-xs font-medium border border-slate-200 rounded-lg pl-9 pr-3 py-2 outline-none bg-slate-50 focus:border-primary focus:bg-white transition-colors"
+              />
+            </div>
           </div>
           
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-slate-100">
             {consistentLoading ? (
-              <div className="py-4 text-center text-xs text-muted-foreground">Loading roster...</div>
+              <div className="py-4 text-center text-xs text-slate-500">Loading roster...</div>
             ) : filteredConsistent.length > 0 ? (
               filteredConsistent.map((item, idx) => (
                 <Link
                   key={item.employeeId}
                   href={`/manager/team/${item.employeeId}/history?tab=submitted`}
-                  className="flex items-center justify-between py-2.5 px-2 -mx-2 hover:bg-muted/60 rounded-md transition-colors cursor-pointer"
+                  className="flex items-center justify-between py-3 hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-muted-foreground">#{idx + 1}</span>
-                      <p className="font-semibold text-sm text-foreground hover:text-primary transition-colors">{item.employeeName}</p>
+                  <div className="flex items-center gap-3">
+                    <span className="w-4 text-xs font-bold text-slate-900">#{idx + 1}</span>
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${getAvatarColor(
+                        item.employeeName
+                      )}`}
+                    >
+                      {getInitials(item.employeeName)}
                     </div>
-                    <p className="text-xs text-muted-foreground ml-4">{item.employeeId} &bull; {item.department}</p>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">{item.employeeName}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{item.employeeId} &bull; {item.department}</p>
+                    </div>
                   </div>
-                  <span className="rounded bg-success/10 px-2 py-0.5 text-xs font-bold text-success">
+                  <span className="rounded bg-green-50 px-2 py-1 text-[11px] font-bold text-green-700">
                     {item.complianceRate}% Compliance
                   </span>
                 </Link>
               ))
             ) : (
-              <div className="py-4 text-center text-xs text-muted-foreground">No consistency records found.</div>
+              <div className="py-4 text-center text-xs text-slate-500">No consistency records found.</div>
             )}
           </div>
+          
+          <Link href="/manager/team" className="text-xs font-bold text-primary hover:underline flex items-center gap-1 mt-2">
+            View full leaderboard <ArrowRightIcon className="h-3 w-3" />
+          </Link>
         </section>
 
         {/* Frequent Missed Reports */}
-        <section className="rounded-lg border border-border bg-card p-6 shadow-sm flex flex-col gap-4">
-          <div className="flex flex-col gap-3 border-b border-border pb-3">
-            <h2 className="text-base font-semibold text-card-foreground flex items-center gap-2">
-              <ExclamationTriangleIcon className="h-5 w-5 text-danger" /> Frequent Missed Reports
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex flex-col gap-4 border-b border-slate-100 pb-4">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-500">
+                <ExclamationTriangleIcon className="h-5 w-5" />
+              </div>
+              Frequent Missed Reports
             </h2>
-            <input
-              type="text"
-              placeholder="Search by name, ID, or department..."
-              value={missersSearch}
-              onChange={(e) => setMissersSearch(e.target.value)}
-              className="w-full text-xs border border-border rounded px-3 py-1.5 outline-none bg-background focus:border-primary transition-colors"
-            />
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by name, ID, or department..."
+                value={missersSearch}
+                onChange={(e) => setMissersSearch(e.target.value)}
+                className="w-full text-xs font-medium border border-slate-200 rounded-lg pl-9 pr-3 py-2 outline-none bg-slate-50 focus:border-primary focus:bg-white transition-colors"
+              />
+            </div>
           </div>
           
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-slate-100">
             {missersLoading ? (
-              <div className="py-4 text-center text-xs text-muted-foreground">Loading roster...</div>
+              <div className="py-4 text-center text-xs text-slate-500">Loading roster...</div>
             ) : filteredMissers.length > 0 ? (
               filteredMissers.map((item, idx) => (
                 <Link
                   key={item.employeeId}
                   href={`/manager/team/${item.employeeId}/history?tab=missed`}
-                  className="flex items-center justify-between py-2.5 px-2 -mx-2 hover:bg-muted/60 rounded-md transition-colors cursor-pointer"
+                  className="flex items-center justify-between py-3 hover:bg-slate-50 transition-colors cursor-pointer group"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-muted-foreground">#{idx + 1}</span>
-                      <p className="font-semibold text-sm text-foreground hover:text-primary transition-colors">{item.employeeName}</p>
+                  <div className="flex items-center gap-3">
+                    <span className="w-4 text-xs font-bold text-slate-900">#{idx + 1}</span>
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${getAvatarColor(
+                        item.employeeName
+                      )}`}
+                    >
+                      {getInitials(item.employeeName)}
                     </div>
-                    <p className="text-xs text-muted-foreground ml-4">{item.employeeId} &bull; {item.department}</p>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">{item.employeeName}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{item.employeeId} &bull; {item.department}</p>
+                    </div>
                   </div>
-                  <span className="rounded bg-danger/10 px-2 py-0.5 text-xs font-bold text-danger">
+                  <span className="rounded bg-red-50 px-2 py-1 text-[11px] font-bold text-red-600">
                     {item.missCount} days missed
                   </span>
                 </Link>
               ))
             ) : (
-              <div className="py-4 text-center text-xs text-muted-foreground">All employees are fully compliant!</div>
+              <div className="py-4 text-center text-xs text-slate-500">All employees are fully compliant!</div>
             )}
           </div>
+          
+          <Link href="/manager/missing" className="text-xs font-bold text-primary hover:underline flex items-center gap-1 mt-2">
+            View all missed reports <ArrowRightIcon className="h-3 w-3" />
+          </Link>
         </section>
       </div>
     </div>
