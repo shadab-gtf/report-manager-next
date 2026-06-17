@@ -48,6 +48,17 @@ export function escapeHtmlMultiline(str: string | undefined | null): string {
 }
 
 export function generateHtmlEmail(data: EmailTemplateData): string {
+  const validMeetings = data.meetings?.filter(m => 
+    (m.subject && m.subject.trim()) || 
+    (m.withWhom && m.withWhom.trim()) || 
+    (m.outcome && m.outcome.trim())
+  ) || [];
+
+  const hasKeyAcc = data.keyAccomplishments && data.keyAccomplishments.trim().length > 0;
+  const hasPending = data.pending && data.pending.trim().length > 0;
+  const hasBlockers = data.blockers && data.blockers.trim().length > 0;
+  const hasTomorrow = data.tomorrowPlan && data.tomorrowPlan.trim().length > 0;
+  const hasAnyNotes = hasKeyAcc || hasPending || hasBlockers || hasTomorrow;
   const tasksHtml = data.tasks.map((task, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
@@ -62,7 +73,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
     </tr>
   `).join("");
 
-  const meetingsHtml = data.meetings.map((meeting, i) => `
+  const meetingsHtml = validMeetings.map((meeting, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
       <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${meeting.subject ? escapeHtml(meeting.subject) : "&nbsp;"}</td>
@@ -150,7 +161,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tfoot>
       </table>
 
-      ${data.meetings && data.meetings.length > 0 ? `
+      ${validMeetings.length > 0 ? `
       <!-- Meetings & Calls Log -->
       <div style="background-color: #6b2288; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
         📞 MEETINGS & CALLS LOG
@@ -173,12 +184,14 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
       </table>
       ` : ""}
 
+      ${hasAnyNotes ? `
       <!-- End of Day Notes -->
       <div style="background-color: #df7622; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
         📝 END OF DAY NOTES
       </div>
       
       <table width="100%" style="border-collapse: collapse; font-size: 11px;">
+        ${hasKeyAcc ? `
         <tr>
           <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
             Key Accomplishments Today:
@@ -186,11 +199,13 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.keyAccomplishments ? escapeHtmlMultiline(data.keyAccomplishments) : "&nbsp;"}
+            ${escapeHtmlMultiline(data.keyAccomplishments)}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
+        ` : ""}
         
+        ${hasPending ? `
         <tr>
           <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
             Pending / Carry Forward:
@@ -198,11 +213,13 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.pending ? escapeHtmlMultiline(data.pending) : "&nbsp;"}
+            ${escapeHtmlMultiline(data.pending)}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
+        ` : ""}
         
+        ${hasBlockers ? `
         <tr>
           <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
             Blockers / Challenges Faced:
@@ -210,11 +227,13 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.blockers ? escapeHtmlMultiline(data.blockers) : "&nbsp;"}
+            ${escapeHtmlMultiline(data.blockers)}
           </td>
         </tr>
         <tr><td style="height: 4px;"></td></tr>
+        ` : ""}
         
+        ${hasTomorrow ? `
         <tr>
           <td style="background-color: #df7622; color: #ffffff; padding: 4px 10px; font-weight: bold; border: 1px solid #df7622;">
             Plan for Tomorrow:
@@ -222,10 +241,12 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
         </tr>
         <tr>
           <td style="border: 1px solid #23304c; border-top: 0; background-color: #e8f4f8; padding: 8px 10px; min-height: 24px; color: #333;">
-            ${data.tomorrowPlan ? escapeHtmlMultiline(data.tomorrowPlan) : "&nbsp;"}
+            ${escapeHtmlMultiline(data.tomorrowPlan)}
           </td>
         </tr>
+        ` : ""}
       </table>
+      ` : ""}
 
       <!-- Productivity Scores -->
       <div style="background-color: #157262; color: #ffffff; padding: 8px 12px; font-size: 13px; font-weight: bold; margin-top: 2px;">
