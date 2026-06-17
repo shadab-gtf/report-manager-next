@@ -62,6 +62,21 @@ export function LoginForm() {
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Secure access for employee reports and offline-ready daily submissions.
         </p>
+        <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground">
+          <p className="mb-2 font-semibold text-primary">Demo Credentials:</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="font-medium text-foreground">Manager</span><br/>
+              ID: <span className="font-mono text-foreground">MGR-1001</span><br/>
+              Pass: <span className="font-mono text-foreground">password123</span>
+            </div>
+            <div>
+              <span className="font-medium text-foreground">Employee</span><br/>
+              ID: <span className="font-mono text-foreground">GTF-1042</span><br/>
+              Pass: <span className="font-mono text-foreground">password123</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div>
         <label className="text-sm font-semibold text-foreground" htmlFor="identifier">
