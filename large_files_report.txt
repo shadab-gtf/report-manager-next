@@ -1,0 +1,17 @@
+﻿332|C:\Users\DELL\Desktop\report-manager\components\sections\app-shell.tsx
+226|C:\Users\DELL\Desktop\report-manager\modules\auth\components\biometric-login-button.tsx
+204|C:\Users\DELL\Desktop\report-manager\modules\auth\components\biometric-toggle.tsx
+296|C:\Users\DELL\Desktop\report-manager\modules\manager\components\analytics-dashboard.tsx
+234|C:\Users\DELL\Desktop\report-manager\modules\manager\components\employee-detail.tsx
+325|C:\Users\DELL\Desktop\report-manager\modules\manager\components\employee-history.tsx
+209|C:\Users\DELL\Desktop\report-manager\modules\manager\components\manager-dashboard.tsx
+321|C:\Users\DELL\Desktop\report-manager\modules\manager\components\missing-reports-table.tsx
+733|C:\Users\DELL\Desktop\report-manager\modules\manager\components\team-reports.tsx
+218|C:\Users\DELL\Desktop\report-manager\modules\manager\components\team-table.tsx
+444|C:\Users\DELL\Desktop\report-manager\modules\manager\services\manager-service.ts
+202|C:\Users\DELL\Desktop\report-manager\modules\manager\services\team-service.ts
+281|C:\Users\DELL\Desktop\report-manager\modules\reports\components\report-builder.tsx
+231|C:\Users\DELL\Desktop\report-manager\modules\reports\components\report-history-table.tsx
+263|C:\Users\DELL\Desktop\report-manager\modules\reports\hooks\use-report-draft.ts
+205|C:\Users\DELL\Desktop\report-manager\modules\reports\services\report-repository.ts
+275|C:\Users\DELL\Desktop\report-manager\modules\reports\utils\email-template.ts
