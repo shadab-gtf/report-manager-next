@@ -2,6 +2,7 @@
 
 import { TrashIcon, DocumentTextIcon, ClockIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { TextField, NumberField, SelectField, AddButton, TextareaField } from "./report-fields";
+import { TimePickerField } from "./time-picker-field";
 import { taskPriorities, taskStatuses } from "@/modules/reports/constants";
 import type { TaskLogItem } from "@/types/report";
 
@@ -64,17 +65,11 @@ export function TaskLogStep({ tasks, updateTask, addTask, removeTask }: TaskLogS
               options={taskStatuses}
               onChange={(value) => updateTask(task.id, { status: value })}
             />
-            <NumberField
+            <TimePickerField
               label="Time spent"
               value={task.timeSpent}
               onChange={(value) => updateTask(task.id, { timeSpent: value })}
               icon={<ClockIcon className="h-4 w-4" />}
-            />
-            <NumberField
-              label="Completion %"
-              value={task.completion}
-              onChange={(value) => updateTask(task.id, { completion: value })}
-              suffix="%"
             />
             <TextField
               label="Expected date"
@@ -82,11 +77,13 @@ export function TaskLogStep({ tasks, updateTask, addTask, removeTask }: TaskLogS
               value={task.expectedCompletionDate}
               onChange={(value) => updateTask(task.id, { expectedCompletionDate: value })}
             />
-            <TextareaField
-              label="Notes"
-              value={task.notes}
-              onChange={(value) => updateTask(task.id, { notes: value })}
-            />
+            <div className="md:col-span-2">
+              <TextareaField
+                label="Notes"
+                value={task.notes}
+                onChange={(value) => updateTask(task.id, { notes: value })}
+              />
+            </div>
           </div>
         </div>
       ))}

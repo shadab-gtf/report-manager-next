@@ -67,7 +67,6 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.priority ? escapeHtml(task.priority) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.status ? escapeHtml(task.status) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.timeSpent !== undefined && task.timeSpent !== "" ? Number(task.timeSpent).toFixed(1) : "0.0"}</td>
-      <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 40px;">${task.completion !== undefined && task.completion !== "" ? task.completion + "%" : "0%"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.plannedBy ? escapeHtml(task.plannedBy) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.notes ? escapeHtml(task.notes) : "&nbsp;"}</td>
     </tr>
@@ -85,11 +84,7 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
     </tr>
   `).join("");
 
-  const tasksCompleted = data.tasks.filter(t => t.status === "Done" || t.completion === 100 || t.completion === "100").length;
-  const tasksTotal = Math.max(data.tasks.length, 1);
-  const avgCompletion = Math.round(
-    data.tasks.reduce((acc, t) => acc + (Number(t.completion) || 0), 0) / tasksTotal
-  );
+  const tasksCompleted = data.tasks.filter(t => t.status === "Done" || t.status === "Completed").length;
 
   return `
 <!DOCTYPE html>
@@ -143,7 +138,6 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
             <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Priority</th>
             <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Status</th>
             <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Time<br/>Spent</th>
-            <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">%<br/>Done</th>
             <th style="border: 1px solid #157262; border-right: 1px solid #23304c; padding: 6px 4px;">Planned<br/>by</th>
             <th style="border: 1px solid #157262; padding: 6px 4px;">Notes / Blockers</th>
           </tr>
@@ -155,7 +149,6 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
           <tr style="background-color: #23304c; color: #ffffff; font-weight: bold; font-size: 11px;">
             <td colspan="5" style="border: 1px solid #23304c; padding: 6px; text-align: center; letter-spacing: 0.5px;">TOTALS</td>
             <td style="border: 1px solid #23304c; padding: 6px;">${data.totalHours.toFixed(1)}</td>
-            <td style="border: 1px solid #23304c; padding: 6px;">—</td>
             <td colspan="2" style="border: 1px solid #23304c; padding: 6px; text-align: center;">${tasksCompleted} tasks done today</td>
           </tr>
         </tfoot>
@@ -262,12 +255,8 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
           <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${data.totalHours.toFixed(1)} hrs</td>
         </tr>
         <tr>
-          <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Avg Task Completion</td>
-          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${avgCompletion}%</td>
-        </tr>
-        <tr>
           <td style="padding: 8px 12px; font-weight: bold; border: 1px solid #23304c; color: #333;">Meetings Today</td>
-          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${data.meetings.length} meetings</td>
+          <td style="padding: 8px 12px; border: 1px solid #23304c; background-color: #e8f4f8; color: #157262; font-weight: bold; text-align: center;">${validMeetings.length} meetings</td>
         </tr>
         <!-- <tr>
           <td style="background-color: #23304c; color: #ffffff; padding: 10px 12px; font-size: 10px; font-weight: bold; border: 1px solid #23304c;">⭐ OVERALL PRODUCTIVITY SCORE</td>
