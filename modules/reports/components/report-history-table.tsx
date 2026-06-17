@@ -144,6 +144,7 @@ export function ReportHistoryTable() {
             <thead className="bg-muted text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3 min-w-[200px]">Report Tasks</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Updated</th>
                 <th className="px-4 py-3 text-right">Actions</th>
@@ -156,6 +157,24 @@ export function ReportHistoryTable() {
                 return (
                   <tr key={report.id} className="hover:bg-muted/70">
                     <td className="px-4 py-4 font-semibold">{report.reportDate}</td>
+                    <td className="px-4 py-4">
+                      <button 
+                        type="button"
+                        onClick={() => handleEdit(report)}
+                        disabled={!isEditable}
+                        className="text-left group flex flex-col items-start disabled:opacity-70 disabled:cursor-auto cursor-pointer"
+                        title={isEditable ? "Click to view/edit tasks" : ""}
+                      >
+                        <div className={`font-semibold ${isEditable ? 'text-primary group-hover:underline' : 'text-foreground'}`}>
+                          {report.tasks?.[0]?.title || `Daily Tasks`}
+                        </div>
+                        {report.tasks?.length > 1 && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            + {report.tasks.length - 1} more task{report.tasks.length > 2 ? 's' : ''}
+                          </div>
+                        )}
+                      </button>
+                    </td>
                     <td className="px-4 py-4">
                       {report.status === "Missed" ? (
                         <span className="inline-flex items-center rounded-md bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">
@@ -187,7 +206,7 @@ export function ReportHistoryTable() {
               })}
               {reports.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
                     No reports match the current filters.
                   </td>
                 </tr>

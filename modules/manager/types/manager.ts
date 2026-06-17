@@ -45,6 +45,7 @@ export interface TeamReport {
   completion: number;
   tasks: Array<{
     id: string;
+    title?: string;
     description: string;
     category: string;
     priority: string;

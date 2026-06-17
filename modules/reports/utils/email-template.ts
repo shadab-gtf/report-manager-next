@@ -8,6 +8,7 @@ interface EmailTemplateData {
   managerName: string; // Used for "Reporting To" and Signature
   totalHours: number;
   tasks: {
+    title?: string;
     description?: string;
     category?: string;
     priority?: string;
@@ -62,7 +63,10 @@ export function generateHtmlEmail(data: EmailTemplateData): string {
   const tasksHtml = data.tasks.map((task, i) => `
     <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#e8f4f8'};">
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; font-weight: bold; color: #333333; width: 20px;">${i + 1}</td>
-      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">${task.description ? escapeHtml(task.description) : "&nbsp;"}</td>
+      <td style="border: 1px solid #23304c; padding: 4px 6px; text-align: left; color: #1a73e8;">
+        <div style="font-weight: bold; color: #1a73e8; margin-bottom: 2px;">${task.title ? escapeHtml(task.title) : `Task ${i + 1}`}</div>
+        <div style="color: #333333; font-size: 9px;">${task.description ? escapeHtml(task.description) : "&nbsp;"}</div>
+      </td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #1a73e8; width: 60px;">${task.category ? escapeHtml(task.category) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.priority ? escapeHtml(task.priority) : "&nbsp;"}</td>
       <td style="border: 1px solid #23304c; padding: 4px; text-align: center; color: #333333; width: 60px;">${task.status ? escapeHtml(task.status) : "&nbsp;"}</td>

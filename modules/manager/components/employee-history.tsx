@@ -217,6 +217,7 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
               <thead className="bg-muted text-xs uppercase text-muted-foreground font-semibold border-b border-border">
                 <tr>
                   <th className="px-5 py-3.5">Date</th>
+                  <th className="px-5 py-3.5 min-w-[200px]">Key Tasks</th>
                   <th className="px-5 py-3.5">Submission Status</th>
                   <th className="px-5 py-3.5">Hours Logged</th>
                   <th className="px-5 py-3.5">Completion</th>
@@ -226,7 +227,7 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
               <tbody className="divide-y divide-border">
                 {historyLoading ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
                       Loading report logs...
                     </td>
                   </tr>
@@ -234,6 +235,21 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
                   history.map((rep) => (
                     <tr key={rep.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-4 font-semibold text-foreground">{rep.reportDate}</td>
+                      <td className="px-5 py-4">
+                        <Link
+                          href={`/manager/reports?open=${rep.id}`}
+                          className="group flex flex-col items-start"
+                        >
+                          <span className="font-semibold text-primary group-hover:underline">
+                            {rep.tasks?.[0]?.title || "Daily Tasks"}
+                          </span>
+                          {rep.tasks?.length > 1 && (
+                            <span className="text-xs text-muted-foreground mt-0.5">
+                              + {rep.tasks.length - 1} more task{rep.tasks.length > 2 ? 's' : ''}
+                            </span>
+                          )}
+                        </Link>
+                      </td>
                       <td className="px-5 py-4">
                         <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                           Submitted
@@ -253,7 +269,7 @@ export function EmployeeHistory({ employeeId, initialTab = "submitted" }: Employ
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-8 text-center text-muted-foreground">
                       No reports submitted in the selected range.
                     </td>
                   </tr>

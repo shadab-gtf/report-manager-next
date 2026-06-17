@@ -155,6 +155,7 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
               <thead className="bg-muted text-xs uppercase text-muted-foreground font-semibold border-b border-border">
                 <tr>
                   <th className="px-5 py-3">Date</th>
+                  <th className="px-5 py-3 min-w-[180px]">Key Tasks</th>
                   <th className="px-5 py-3">Hours Logged</th>
                   <th className="px-5 py-3">Completion</th>
                   <th className="px-5 py-3">Submission Status</th>
@@ -164,7 +165,7 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
               <tbody className="divide-y divide-border">
                 {historyLoading ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-4 text-center text-xs text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-4 text-center text-xs text-muted-foreground">
                       Loading history...
                     </td>
                   </tr>
@@ -190,6 +191,25 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                         return (
                           <tr key={date} className="hover:bg-muted/30">
                             <td className="px-5 py-3.5 font-medium">{date}</td>
+                            <td className="px-5 py-3.5">
+                              {rep ? (
+                                <Link
+                                  href={`/manager/reports?open=${rep.id}`}
+                                  className="group flex flex-col items-start"
+                                >
+                                  <span className="font-semibold text-primary group-hover:underline">
+                                    {rep.tasks?.[0]?.title || "Daily Tasks"}
+                                  </span>
+                                  {rep.tasks?.length > 1 && (
+                                    <span className="text-xs text-muted-foreground mt-0.5">
+                                      + {rep.tasks.length - 1} more task{rep.tasks.length > 2 ? 's' : ''}
+                                    </span>
+                                  )}
+                                </Link>
+                              ) : (
+                                <span className="text-muted-foreground">-</span>
+                              )}
+                            </td>
                             <td className="px-5 py-3.5">{rep ? `${rep.hoursLogged} hrs` : "-"}</td>
                             <td className="px-5 py-3.5">{rep ? `${rep.completion}%` : "-"}</td>
                             <td className="px-5 py-3.5">
@@ -218,7 +238,7 @@ export function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                       })
                     ) : (
                       <tr>
-                        <td colSpan={5} className="px-5 py-4 text-center text-xs text-muted-foreground">
+                        <td colSpan={6} className="px-5 py-4 text-center text-xs text-muted-foreground">
                           No recent dates available.
                         </td>
                       </tr>
